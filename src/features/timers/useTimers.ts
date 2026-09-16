@@ -41,6 +41,16 @@ export function useTimers() {
       [update],
     ),
     reset: useCallback((id: string) => update(id, core.reset), [update]),
+    acknowledgeAll: useCallback(() => {
+      const now = Date.now()
+      setTimers((current) =>
+        current.map((timer) =>
+          core.isFinished(timer, now) && timer.acknowledgedAt === null
+            ? core.acknowledge(timer, now)
+            : timer,
+        ),
+      )
+    }, []),
     setLabel: useCallback(
       (id: string, label: string) => update(id, (t) => core.setLabel(t, label)),
       [update],

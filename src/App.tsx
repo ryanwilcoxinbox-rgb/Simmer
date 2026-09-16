@@ -4,6 +4,7 @@ import { TimersScreen } from './features/timers/TimersScreen'
 import { GuideScreen } from './features/guide/GuideScreen'
 import { SpicesScreen } from './features/spices/SpicesScreen'
 import { SettingsScreen } from './features/settings/SettingsScreen'
+import { SettingsProvider } from './features/settings/SettingsProvider'
 
 const TABS = [
   { id: 'timers', label: 'Timers', screen: TimersScreen },
@@ -20,23 +21,25 @@ export function App() {
   const Screen = TABS.find((t) => t.id === activeTab)!.screen
 
   return (
-    <div className="app">
-      <main className="app__body">
-        <Screen />
-      </main>
+    <SettingsProvider>
+      <div className="app">
+        <main className="app__body">
+          <Screen />
+        </main>
 
-      <nav className="tabbar" aria-label="Sections">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            className="tabbar__tab"
-            aria-current={tab.id === activeTab ? 'page' : undefined}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </nav>
-    </div>
+        <nav className="tabbar" aria-label="Sections">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              className="tabbar__tab"
+              aria-current={tab.id === activeTab ? 'page' : undefined}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+    </SettingsProvider>
   )
 }

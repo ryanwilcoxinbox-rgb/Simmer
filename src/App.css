@@ -362,3 +362,53 @@
 .sheet:focus {
   outline: none;
 }
+
+/* ---- Finished-timer alarm banner (rule 3) ---- */
+
+.alarm {
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  background: var(--accent);
+  border-radius: var(--radius);
+  color: var(--accent-ink);
+}
+
+.alarm__list {
+  margin-bottom: 12px;
+}
+
+.alarm__item {
+  margin: 0 0 4px;
+  font-size: 1.0625rem;
+  line-height: 1.3;
+}
+
+.alarm__item:last-child {
+  margin-bottom: 0;
+}
+
+.alarm__item strong {
+  font-weight: 800;
+}
+
+/* Deliberately the largest target on the screen: it gets hit with wet hands. */
+.alarm__dismiss {
+  width: 100%;
+  min-height: 60px;
+  background: var(--accent-ink);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.wide-button {
+  width: 100%;
+  min-height: var(--tap);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+}
