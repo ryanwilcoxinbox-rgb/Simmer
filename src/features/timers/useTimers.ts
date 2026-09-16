@@ -55,6 +55,19 @@ export function useTimers() {
       (id: string, label: string) => update(id, (t) => core.setLabel(t, label)),
       [update],
     ),
+    /**
+     * Nudge the length by a delta rather than setting an absolute value.
+     *
+     * The stepper buttons must go through this. Computing the new value in the
+     * component reads whatever duration was last rendered, so several taps in
+     * the same frame all start from the same number and all but one are lost.
+     * Applying the delta inside the state updater makes each tap count.
+     */
+    adjustDuration: useCallback(
+      (id: string, deltaMs: number) =>
+        update(id, (t) => core.setDuration(t, t.durationMs + deltaMs)),
+      [update],
+    ),
     setDuration: useCallback(
       (id: string, ms: number) => update(id, (t) => core.setDuration(t, ms)),
       [update],

@@ -45,3 +45,17 @@ export function formatSince(ms: number): string {
   if (minutes === 0) return `${hours} hr ago`
   return `${hours} hr ${minutes} min ago`
 }
+
+/**
+ * A duration written the short way, for preset buttons and labels where
+ * "03:30" is more digits than the space deserves: "45s", "3m", "3m30".
+ */
+export function formatCompact(ms: number): string {
+  const totalSeconds = Math.floor(Math.max(0, ms) / 1000)
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+
+  if (minutes === 0) return `${seconds}s`
+  if (seconds === 0) return `${minutes}m`
+  return `${minutes}m${String(seconds).padStart(2, '0')}`
+}

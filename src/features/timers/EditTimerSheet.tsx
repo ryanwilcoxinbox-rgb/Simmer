@@ -1,9 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { MAX_DURATION_MS, type Timer, type TimerMode } from '../../core/timers'
-import { formatDuration } from '../../core/format'
-
-/** Quick presets for the durations that actually come up in a kitchen. */
-const PRESET_MINUTES = [1, 2, 3, 5, 8, 10, 12, 15, 20, 25, 30, 45]
+import type { Timer, TimerMode } from '../../core/timers'
+import { DurationPicker } from './DurationPicker'
 
 interface Props {
   timer: Timer
@@ -12,6 +9,7 @@ interface Props {
   onLabelChange: (label: string) => void
   onModeChange: (mode: TimerMode) => void
   onDurationChange: (ms: number) => void
+  onDurationAdjust: (deltaMs: number) => void
   onRemove: () => void
   onClose: () => void
 }
@@ -23,6 +21,7 @@ export function EditTimerSheet({
   onLabelChange,
   onModeChange,
   onDurationChange,
+  onDurationAdjust,
   onRemove,
   onClose,
 }: Props) {
@@ -46,9 +45,6 @@ export function EditTimerSheet({
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [onClose])
-
-  const adjust = (deltaMinutes: number) =>
-    onDurationChange(timer.durationMs + deltaMinutes * 60_000)
 
   return (
     <div className="sheet__scrim" onClick={onClose}>
@@ -104,47 +100,11 @@ export function EditTimerSheet({
         </div>
 
         {timer.mode === 'countdown' && (
-          <div className="field">
-            <span className="field__label">Length</span>
-            <div className="duration">
-              <button
-                className="duration__step"
-                onClick={() => adjust(-1)}
-                disabled={timer.durationMs <= 0}
-                aria-label="One minute less"
-              >
-                -1
-              </button>
-              <span className="duration__value">
-                {formatDuration(timer.durationMs)}
-              </span>
-              <button
-                className="duration__step"
-                onClick={() => adjust(1)}
-                disabled={timer.durationMs >= MAX_DURATION_MS}
-                aria-label="One minute more"
-              >
-                +1
-              </button>
-            </div>
-
-            <div className="presets">
-              {PRESET_MINUTES.map((minutes) => (
-                <button
-                  key={minutes}
-                  className="presets__option"
-                  aria-pressed={timer.durationMs === minutes * 60_000}
-                  onClick={() => onDurationChange(minutes * 60_000)}
-                >
-                  {minutes}m
-                </button>
-              ))}
-            </div>
-            <p className="field__hint">
-              Changing the length while a timer runs just moves the finish line.
-              It does not restart it.
-            </p>
-          </div>
+          <DurationPicker
+            durationMs={timer.durationMs}
+            onChange={onDurationChange}
+            onAdjust={onDurationAdjust}
+          />
         )}
 
         {canRemove && (
