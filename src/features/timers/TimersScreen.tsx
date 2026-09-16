@@ -4,13 +4,13 @@ import { useWakeLock } from '../../platform/useWakeLock'
 import * as audio from '../../platform/audio'
 import { remainingMs, unacknowledgedFinished, type Timer } from '../../core/timers'
 import { useSettings } from '../settings/settingsStore'
-import { useTimers } from './useTimers'
+import { useTimersContext } from './timersStore'
 import { TimerRow } from './TimerRow'
 import { EditTimerSheet } from './EditTimerSheet'
 import { AlarmBanner } from './AlarmBanner'
 
 export function TimersScreen() {
-  const timers = useTimers()
+  const timers = useTimersContext()
   const { settings, update } = useSettings()
   // The clock only ticks while something is counting, to save battery.
   const now = useNow(timers.anyRunning)

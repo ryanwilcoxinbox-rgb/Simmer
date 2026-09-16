@@ -63,6 +63,32 @@ export function useTimers() {
       (id: string, mode: TimerMode) => update(id, (t) => core.setMode(t, mode)),
       [update],
     ),
+    /**
+     * Used by the Guide: name a timer, set its length and start it in one go.
+     * Reuses an untouched row if there is one, so looking up three things does
+     * not leave a trail of spare timers behind.
+     */
+    startLabelled: useCallback((label: string, minutes: number) => {
+      const now = Date.now()
+      const configure = (timer: Timer) =>
+        core.start(
+          core.setDuration(
+            core.setLabel(core.setMode(timer, 'countdown'), label),
+            minutes * 60_000,
+          ),
+          now,
+        )
+      setTimers((current) => {
+        const spare = current.find(
+          (t) => t.label === '' && t.runningSince === null && t.accumulatedMs === 0,
+        )
+        if (spare) {
+          return current.map((t) => (t.id === spare.id ? configure(t) : t))
+        }
+        if (current.length >= MAX_ROWS) return current
+        return [...current, configure(core.createTimer())]
+      })
+    }, []),
     add: useCallback(() => {
       setTimers((current) =>
         current.length >= MAX_ROWS ? current : [...current, core.createTimer()],

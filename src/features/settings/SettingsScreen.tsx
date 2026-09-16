@@ -65,7 +65,7 @@ export function SettingsScreen() {
           ))}
         </div>
         <p className="field__hint">
-          Saved now, used by the Guide tab when it arrives in Milestone 5.
+          Changes every temperature shown in the Guide.
         </p>
       </div>
 

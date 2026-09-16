@@ -1,45 +1,52 @@
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import './App.css'
 import { TimersScreen } from './features/timers/TimersScreen'
 import { GuideScreen } from './features/guide/GuideScreen'
 import { SpicesScreen } from './features/spices/SpicesScreen'
 import { SettingsScreen } from './features/settings/SettingsScreen'
 import { SettingsProvider } from './features/settings/SettingsProvider'
+import { TimersProvider } from './features/timers/TimersProvider'
+import { NavigationContext, type TabId } from './features/shell/navigationStore'
 
-const TABS = [
+const TABS: { id: TabId; label: string; screen: () => React.JSX.Element }[] = [
   { id: 'timers', label: 'Timers', screen: TimersScreen },
   { id: 'guide', label: 'Guide', screen: GuideScreen },
   { id: 'spices', label: 'Spices', screen: SpicesScreen },
   { id: 'settings', label: 'Settings', screen: SettingsScreen },
-] as const
-
-type TabId = (typeof TABS)[number]['id']
+]
 
 export function App() {
   // Timers is the home screen, as the brief requires.
   const [activeTab, setActiveTab] = useState<TabId>('timers')
+  const goTo = useCallback((tab: TabId) => setActiveTab(tab), [])
+  const navigation = useMemo(() => ({ goTo }), [goTo])
   const Screen = TABS.find((t) => t.id === activeTab)!.screen
 
   return (
     <SettingsProvider>
-      <div className="app">
-        <main className="app__body">
-          <Screen />
-        </main>
+      <TimersProvider>
+        <NavigationContext value={navigation}>
+          <div className="app">
+            {/* Remounting on tab change resets each screen's scroll position. */}
+            <main className="app__body" key={activeTab}>
+              <Screen />
+            </main>
 
-        <nav className="tabbar" aria-label="Sections">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              className="tabbar__tab"
-              aria-current={tab.id === activeTab ? 'page' : undefined}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
+            <nav className="tabbar" aria-label="Sections">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  className="tabbar__tab"
+                  aria-current={tab.id === activeTab ? 'page' : undefined}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </NavigationContext>
+      </TimersProvider>
     </SettingsProvider>
   )
 }
