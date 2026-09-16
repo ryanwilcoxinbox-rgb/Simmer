@@ -16,11 +16,18 @@ export interface Settings {
    * unproven and it keeps a silent sound playing, which costs battery.
    */
   backgroundAlarm: boolean
+  /**
+   * Whether the first-run reminder about the ringer has been dismissed. We
+   * cannot detect the silent switch from a web page, so the only defence is
+   * telling the user plainly.
+   */
+  silentReminderDismissed: boolean
 }
 
 export const DEFAULT_SETTINGS: Settings = {
   temperatureUnit: 'C',
   backgroundAlarm: false,
+  silentReminderDismissed: false,
 }
 
 export function serializeSettings(settings: Settings): string {
@@ -49,5 +56,9 @@ export function deserializeSettings(raw: string | null): Settings {
       typeof stored.backgroundAlarm === 'boolean'
         ? stored.backgroundAlarm
         : DEFAULT_SETTINGS.backgroundAlarm,
+    silentReminderDismissed:
+      typeof stored.silentReminderDismissed === 'boolean'
+        ? stored.silentReminderDismissed
+        : DEFAULT_SETTINGS.silentReminderDismissed,
   }
 }

@@ -63,7 +63,11 @@ describe('unacknowledgedFinished', () => {
 
 describe('settings', () => {
   it('round trips', () => {
-    const settings = { temperatureUnit: 'F' as const, backgroundAlarm: true }
+    const settings = {
+      temperatureUnit: 'F' as const,
+      backgroundAlarm: true,
+      silentReminderDismissed: true,
+    }
     expect(deserializeSettings(serializeSettings(settings))).toEqual(settings)
   })
 

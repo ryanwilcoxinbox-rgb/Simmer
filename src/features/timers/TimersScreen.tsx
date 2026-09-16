@@ -11,7 +11,7 @@ import { AlarmBanner } from './AlarmBanner'
 
 export function TimersScreen() {
   const timers = useTimers()
-  const { settings } = useSettings()
+  const { settings, update } = useSettings()
   // The clock only ticks while something is counting, to save battery.
   const now = useNow(timers.anyRunning)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -123,11 +123,32 @@ export function TimersScreen() {
         }}
       />
 
+      {/*
+        A one-off nudge, because a web page cannot read the silent switch and
+        so cannot warn you at the moment it actually matters. It is a nudge
+        only. The standing line below is the real safeguard, per rule 5.
+      */}
+      {!settings.silentReminderDismissed && (
+        <div className="reminder">
+          <p className="reminder__text">
+            <strong>Check your ringer is on.</strong> Simmer cannot tell whether
+            your phone is on silent, and an alarm you cannot hear is no use.
+            There is a test button in Settings.
+          </p>
+          <button
+            className="reminder__ok"
+            onClick={() => update({ silentReminderDismissed: true })}
+          >
+            Got it
+          </button>
+        </div>
+      )}
+
       {/* Rule 5: said on the screen where it matters, not in onboarding. */}
       <p className="notice">
         {timers.anyRunning
-          ? 'Screen stays on. Keep this app open for alarms.'
-          : 'Alarms only sound while this app is open on screen.'}
+          ? 'Screen stays on. Keep the app open and your ringer on.'
+          : 'Alarms need this app open and your ringer on.'}
       </p>
 
       <div className="rows">
