@@ -213,3 +213,53 @@ export function audioSessionSupport(): 'supported' | 'unavailable' {
 export function isReady(): boolean {
   return context !== null && context.state === 'running'
 }
+
+/* ---- The "put something on" prompt ---- */
+
+let promptTimer: number | null = null
+
+/**
+ * A gentler two-note rise, deliberately unlike the alarm.
+ *
+ * A meal plan prompt and a finished timer mean opposite things: one says start
+ * something, the other says stop. If they sounded the same, Arran would have
+ * to look at the screen to tell which, and the whole point of a sound is that
+ * he does not have to.
+ */
+const PROMPT_TONES = [587.3, 880] // D5 up to A5, an open interval rather than urgent
+const PROMPT_PERIOD_MS = 5000
+
+function schedulePromptChime(startAt: number): void {
+  if (!context) return
+  PROMPT_TONES.forEach((frequency, index) => {
+    const at = startAt + index * 0.19
+    const oscillator = context!.createOscillator()
+    const gain = context!.createGain()
+    // A triangle wave is softer than the alarm's square, and it carries
+    // without sounding like something has gone wrong.
+    oscillator.type = 'triangle'
+    oscillator.frequency.value = frequency
+    gain.gain.setValueAtTime(0.0001, at)
+    gain.gain.exponentialRampToValueAtTime(0.4, at + 0.02)
+    gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.42)
+    oscillator.connect(gain).connect(context!.destination)
+    oscillator.start(at)
+    oscillator.stop(at + 0.45)
+  })
+}
+
+export function startPrompting(): void {
+  if (!context || promptTimer !== null) return
+  resume()
+  schedulePromptChime(context.currentTime + 0.05)
+  promptTimer = window.setInterval(() => {
+    if (context) schedulePromptChime(context.currentTime + 0.05)
+  }, PROMPT_PERIOD_MS)
+}
+
+export function stopPrompting(): void {
+  if (promptTimer !== null) {
+    window.clearInterval(promptTimer)
+    promptTimer = null
+  }
+}
