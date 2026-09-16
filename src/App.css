@@ -831,3 +831,197 @@
   color: var(--text-dim);
   font-size: 0.875rem;
 }
+
+/* ---- Meal plan ---- */
+
+.add-row--plan {
+  border-style: solid;
+  border-color: var(--border-bright);
+  color: var(--text);
+}
+
+/* The quiet plan summary: what is coming, and when. */
+.plan {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 13px 15px;
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  text-align: left;
+}
+
+.plan__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.plan__label {
+  color: var(--text-dim);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+
+.plan__edit {
+  color: var(--accent);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.plan__ready {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.plan__slip {
+  color: var(--ember);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.plan__next {
+  color: var(--text-dim);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.plan__dishes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.pill {
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pill--waiting {
+  color: var(--text-dim);
+}
+
+.pill--due,
+.pill--overdue {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* A started dish is settled, so it recedes rather than competing for attention. */
+.pill--started {
+  color: var(--text-dim);
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+/* ---- The loud half: put something on now ---- */
+
+.prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.prompt__item {
+  padding: 15px 16px;
+  background: linear-gradient(150deg, var(--accent), var(--accent-deep));
+  border-radius: var(--radius);
+  color: #fff;
+}
+
+.prompt__text {
+  margin: 0 0 12px;
+  font-size: 1.0625rem;
+  line-height: 1.4;
+}
+
+.prompt__text strong {
+  font-weight: 800;
+}
+
+.prompt__cook,
+.prompt__late {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.875rem;
+  opacity: 0.85;
+}
+
+.prompt__start {
+  width: 100%;
+  min-height: 60px;
+  background: rgb(0 0 0 / 72%);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+/* ---- Plan sheet ---- */
+
+.plan__warning {
+  color: var(--ember);
+  font-weight: 600;
+}
+
+.dish {
+  margin-bottom: 14px;
+  padding: 13px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.dish__top {
+  display: flex;
+  gap: 9px;
+  margin-bottom: 10px;
+}
+
+.dish__label {
+  flex: 1;
+  min-width: 0;
+}
+
+.dish__remove {
+  flex: none;
+  min-height: var(--tap);
+  padding: 0 13px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: #ff8f6b;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* The cook time doubles as this row's label, so it is sized to be read. */
+.dish .steps__name {
+  min-width: 62px;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.dish__slot {
+  margin: 10px 0 0;
+  color: var(--text-dim);
+  font-size: 0.8125rem;
+}

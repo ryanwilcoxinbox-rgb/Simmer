@@ -3,7 +3,12 @@ import { useNow } from '../../platform/useNow'
 import { useWakeLock } from '../../platform/useWakeLock'
 import * as audio from '../../platform/audio'
 import { remainingMs, unacknowledgedFinished, type Timer } from '../../core/timers'
+import { dueDishes, type PlanDish } from '../../core/plan'
 import { useSettings } from '../settings/settingsStore'
+import { usePlan } from '../plan/usePlan'
+import { PlanCard } from '../plan/PlanCard'
+import { PlanPrompt } from '../plan/PlanPrompt'
+import { PlanSheet } from '../plan/PlanSheet'
 import { useTimersContext } from './timersStore'
 import { TimerRow } from './TimerRow'
 import { EditTimerSheet } from './EditTimerSheet'
@@ -12,19 +17,36 @@ import { PotMark } from '../shell/icons'
 
 export function TimersScreen() {
   const timers = useTimersContext()
+  const plan = usePlan()
   const { settings, update } = useSettings()
-  // The clock only ticks while something is counting, to save battery.
-  const now = useNow(timers.anyRunning)
+
+  /*
+   * The clock has to tick while a plan is live even with nothing counting,
+   * because the plan is watching for the moment a dish falls due. Without the
+   * second condition a plan would sit silent until something else woke the
+   * screen up.
+   */
+  const now = useNow(timers.anyRunning || plan.plan !== null)
+
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [planOpen, setPlanOpen] = useState(false)
   // Stable identity, so the sheet's key handler is not torn down and rebuilt
   // on every keystroke in the label field.
   const closeSheet = useCallback(() => setEditingId(null), [])
+  const closePlan = useCallback(() => setPlanOpen(false), [])
 
   // Rule 2: hold the screen awake for as long as anything is counting.
   useWakeLock(timers.anyRunning)
 
-  const due = unacknowledgedFinished(timers.timers, now)
-  const alarming = due.length > 0
+  const finished = unacknowledgedFinished(timers.timers, now)
+  const alarming = finished.length > 0
+  /*
+   * No prompting while the plan sheet is open. Creating a plan starts with a
+   * dish due immediately, and being chimed at mid-sentence while typing its
+   * name is no way to be greeted. The plan goes live when the sheet closes.
+   */
+  const dishesDue = plan.plan && !planOpen ? dueDishes(plan.plan, now) : []
+  const prompting = dishesDue.length > 0
 
   // Rule 3 and 4: make a finished timer loud, including one that expired while
   // the app was in the background.
@@ -70,6 +92,42 @@ export function TimersScreen() {
     }
   }, [alarming])
 
+  /*
+   * A dish falling due gets its own, softer sound. It also gives way entirely
+   * while a timer alarm is going: two different repeating sounds at once is
+   * noise, and "something has finished" is the more urgent of the two.
+   */
+  useEffect(() => {
+    if (!prompting || alarming) {
+      audio.stopPrompting()
+      return
+    }
+    const chime = () => {
+      audio.resume()
+      audio.stopPrompting()
+      audio.startPrompting()
+    }
+    chime()
+
+    const chimeOnFirstTap = () => {
+      audio.unlock()
+      chime()
+    }
+    if (!audio.isReady()) {
+      document.addEventListener('pointerdown', chimeOnFirstTap, { once: true })
+    }
+    const onVisible = () => {
+      if (!document.hidden) chime()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+
+    return () => {
+      document.removeEventListener('pointerdown', chimeOnFirstTap)
+      document.removeEventListener('visibilitychange', onVisible)
+      audio.stopPrompting()
+    }
+  }, [prompting, alarming])
+
   // The experiment's silent keep-alive only runs while it is switched on and
   // something is actually counting.
   useEffect(() => {
@@ -103,6 +161,19 @@ export function TimersScreen() {
     timers.start(timer.id)
   }
 
+  /*
+   * One tap does both halves of the job: the plan records that the food went
+   * on, and a labelled countdown starts for it. Keeping these together is what
+   * makes prompting as cheap as auto-starting would have been, without the
+   * timer ever running ahead of the food.
+   */
+  const handleStartDish = (dish: PlanDish) => {
+    audio.unlock()
+    const clock = Date.now()
+    plan.startDish(dish.id, clock)
+    timers.startLabelled(dish.label || 'Dish', dish.cookMs / 60_000)
+  }
+
   const editingIndex = timers.timers.findIndex((t) => t.id === editingId)
   const editing = editingIndex === -1 ? null : timers.timers[editingIndex]
   const nameFor = (index: number) => `Timer ${index + 1}`
@@ -117,7 +188,7 @@ export function TimersScreen() {
       </h1>
 
       <AlarmBanner
-        due={due}
+        due={finished}
         now={now}
         labelFor={labelOf}
         onDismiss={() => {
@@ -126,6 +197,15 @@ export function TimersScreen() {
           timers.acknowledgeAll()
         }}
       />
+
+      {plan.plan && (
+        <PlanPrompt
+          plan={plan.plan}
+          due={dishesDue}
+          now={now}
+          onStart={handleStartDish}
+        />
+      )}
 
       {/*
         A one-off nudge, because a web page cannot read the silent switch and
@@ -155,6 +235,10 @@ export function TimersScreen() {
           : 'Alarms need this app open and your ringer on.'}
       </p>
 
+      {plan.plan && (
+        <PlanCard plan={plan.plan} now={now} onEdit={() => setPlanOpen(true)} />
+      )}
+
       <div className="rows">
         {timers.timers.map((timer, index) => (
           <TimerRow
@@ -173,6 +257,18 @@ export function TimersScreen() {
       {timers.canAdd && (
         <button className="add-row" onClick={timers.add}>
           Add a timer
+        </button>
+      )}
+
+      {plan.plan === null && (
+        <button
+          className="add-row add-row--plan"
+          onClick={() => {
+            plan.create(Date.now())
+            setPlanOpen(true)
+          }}
+        >
+          Plan a meal that finishes together
         </button>
       )}
 
@@ -199,6 +295,25 @@ export function TimersScreen() {
             closeSheet()
           }}
           onClose={closeSheet}
+        />
+      )}
+
+      {planOpen && plan.plan && (
+        <PlanSheet
+          plan={plan.plan}
+          now={now}
+          canAddDish={plan.canAddDish}
+          onLabelChange={plan.setDishLabel}
+          onCookAdjust={plan.adjustDishCook}
+          onRemoveDish={plan.removeDish}
+          onAddDish={plan.addDish}
+          onReadyAdjust={plan.adjustReadyAt}
+          onReadyAsSoonAsPossible={() => plan.readyAsSoonAsPossible(Date.now())}
+          onClear={() => {
+            plan.clear()
+            closePlan()
+          }}
+          onClose={closePlan}
         />
       )}
     </>
