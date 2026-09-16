@@ -67,8 +67,6 @@
   color: var(--text);
 }
 
-/* ---- Timer rows (inert preview until Milestone 2) ---- */
-
 .notice {
   margin: 0 0 14px;
   padding: 9px 13px;
@@ -79,6 +77,8 @@
   font-size: 0.8125rem;
   line-height: 1.35;
 }
+
+/* ---- Timer rows ---- */
 
 .rows {
   display: flex;
@@ -101,9 +101,18 @@
   border-radius: var(--radius);
 }
 
+.row--finished {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+}
+
+/* The whole readout is the tap target for editing, not a small pencil icon. */
 .row__info {
+  display: block;
   flex: 1;
   min-width: 0;
+  padding: 0;
+  text-align: left;
 }
 
 .row__top {
@@ -120,6 +129,11 @@
   white-space: nowrap;
 }
 
+.row__label--empty {
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
 .row__mode {
   flex: none;
   color: var(--text-dim);
@@ -128,13 +142,23 @@
   letter-spacing: 0.07em;
 }
 
+.row--finished .row__mode {
+  color: var(--accent);
+  font-weight: 700;
+}
+
 .row__time {
+  display: block;
   font-size: 2.25rem;
   font-weight: 300;
   line-height: 1.15;
   /* Digits keep a fixed width so the readout does not shuffle each second. */
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
+}
+
+.row--finished .row__time {
+  color: var(--accent);
 }
 
 .row__actions {
@@ -158,10 +182,178 @@
   color: var(--accent-ink);
 }
 
-/*
- * The preview stays at full contrast on purpose: the point of Milestone 1 is
- * to judge readability at arm's length, and dimming it would defeat that.
- */
-.rows--preview {
-  pointer-events: none;
+.row__button:disabled {
+  opacity: 0.35;
+}
+
+.add-row {
+  width: 100%;
+  min-height: var(--tap);
+  margin-top: 10px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+/* ---- Edit sheet ---- */
+
+.sheet__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: flex-end;
+  background: rgb(0 0 0 / 60%);
+}
+
+.sheet {
+  max-height: 88vh;
+  width: 100%;
+  overflow-y: auto;
+  padding: 16px 16px calc(env(safe-area-inset-bottom) + 20px);
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  border-radius: 20px 20px 0 0;
+}
+
+.sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.sheet__title {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.sheet__done {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.sheet__remove {
+  width: 100%;
+  min-height: var(--tap);
+  margin-top: 4px;
+  border-radius: 12px;
+  background: var(--surface);
+  color: #ff8f6b;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+/* ---- Form pieces inside the sheet ---- */
+
+.field {
+  display: block;
+  margin-bottom: 20px;
+}
+
+.field__label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.field__hint {
+  margin: 8px 0 0;
+  color: var(--text-dim);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.field__input {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 0 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  /* 16px or larger, or iOS zooms the page in when the field is focused. */
+  font-size: 1.0625rem;
+  font-family: inherit;
+}
+
+.segmented {
+  display: flex;
+  gap: 8px;
+}
+
+.segmented__option {
+  flex: 1;
+  min-height: var(--tap);
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.segmented__option[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.duration {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.duration__step {
+  min-width: 64px;
+  min-height: var(--tap);
+  border-radius: 12px;
+  background: var(--surface-raised);
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+.duration__step:disabled {
+  opacity: 0.35;
+}
+
+.duration__value {
+  flex: 1;
+  font-size: 2.25rem;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.presets__option {
+  min-height: 48px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.presets__option[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
 }

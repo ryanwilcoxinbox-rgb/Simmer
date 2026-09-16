@@ -1,48 +1,61 @@
-import { formatDuration } from '../../core/format'
-
-/**
- * Milestone 1 shows the intended layout with the controls switched off, so
- * the sizing and contrast can be judged on a real phone before Milestone 2
- * makes any of it work.
- */
-const PREVIEW_ROWS = [
-  { label: 'Rice', mode: 'Countdown', ms: 15 * 60_000 },
-  { label: 'Chicken', mode: 'Countdown', ms: 40 * 60_000 },
-  { label: 'Veg', mode: 'Countdown', ms: 8 * 60_000 },
-  { label: 'Sourdough proof', mode: 'Stopwatch', ms: 0 },
-  { label: 'Timer 5', mode: 'Countdown', ms: 0 },
-]
+import { useState } from 'react'
+import { useNow } from '../../platform/useNow'
+import { useTimers } from './useTimers'
+import { TimerRow } from './TimerRow'
+import { EditTimerSheet } from './EditTimerSheet'
 
 export function TimersScreen() {
+  const timers = useTimers()
+  // The clock only ticks while something is counting, to save battery.
+  const now = useNow(timers.anyRunning)
+  const [editingId, setEditingId] = useState<string | null>(null)
+
+  const editingIndex = timers.timers.findIndex((t) => t.id === editingId)
+  const editing = editingIndex === -1 ? null : timers.timers[editingIndex]
+  const nameFor = (index: number) => `Timer ${index + 1}`
+
   return (
     <>
       <h1 className="screen__title">Simmer</h1>
 
       <p className="notice">Screen stays on. Keep this app open for alarms.</p>
 
-      <div className="rows rows--preview" aria-hidden="true">
-        {PREVIEW_ROWS.map((row) => (
-          <div className="row" key={row.label}>
-            <div className="row__info">
-              <div className="row__top">
-                <span className="row__label">{row.label}</span>
-                <span className="row__mode">{row.mode}</span>
-              </div>
-              <div className="row__time">{formatDuration(row.ms)}</div>
-            </div>
-            <div className="row__actions">
-              <button className="row__button row__button--primary">Start</button>
-              <button className="row__button">Reset</button>
-            </div>
-          </div>
+      <div className="rows">
+        {timers.timers.map((timer, index) => (
+          <TimerRow
+            key={timer.id}
+            timer={timer}
+            now={now}
+            fallbackLabel={nameFor(index)}
+            onStart={() => timers.start(timer.id)}
+            onPause={() => timers.pause(timer.id)}
+            onReset={() => timers.reset(timer.id)}
+            onEdit={() => setEditingId(timer.id)}
+          />
         ))}
       </div>
 
-      <div className="placeholder">
-        <strong>Preview only</strong>
-        These rows are a layout sketch so you can check the sizing on your
-        phone. Working timers arrive in Milestone 2.
-      </div>
+      {timers.canAdd && (
+        <button className="add-row" onClick={timers.add}>
+          Add a timer
+        </button>
+      )}
+
+      {editing && (
+        <EditTimerSheet
+          timer={editing}
+          fallbackLabel={nameFor(editingIndex)}
+          canRemove={timers.canRemove}
+          onLabelChange={(label) => timers.setLabel(editing.id, label)}
+          onModeChange={(mode) => timers.setMode(editing.id, mode)}
+          onDurationChange={(ms) => timers.setDuration(editing.id, ms)}
+          onRemove={() => {
+            timers.remove(editing.id)
+            setEditingId(null)
+          }}
+          onClose={() => setEditingId(null)}
+        />
+      )}
     </>
   )
 }
