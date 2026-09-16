@@ -55,6 +55,11 @@ export function unlock(): boolean {
       if (!Ctor) return false
       context = new Ctor()
     }
+    // DO NOT REMOVE without re-testing a locked-phone alarm. This was added
+    // for the silent switch, but it is also the most likely reason alarms
+    // sound at all while the phone is locked: it declares Simmer a media app,
+    // and iOS lets media apps keep running in the background. Verified on iOS
+    // 26.3.1 over 30 minutes. See docs/ios-findings.md.
     if (navigator.audioSession) navigator.audioSession.type = 'playback'
     // Resuming is what actually consumes the user gesture.
     void context.resume()
