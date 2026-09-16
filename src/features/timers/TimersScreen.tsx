@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useNow } from '../../platform/useNow'
 import { useTimers } from './useTimers'
 import { TimerRow } from './TimerRow'
@@ -9,6 +9,9 @@ export function TimersScreen() {
   // The clock only ticks while something is counting, to save battery.
   const now = useNow(timers.anyRunning)
   const [editingId, setEditingId] = useState<string | null>(null)
+  // Stable identity, so the sheet's key handler is not torn down and rebuilt
+  // on every keystroke in the label field.
+  const closeSheet = useCallback(() => setEditingId(null), [])
 
   const editingIndex = timers.timers.findIndex((t) => t.id === editingId)
   const editing = editingIndex === -1 ? null : timers.timers[editingIndex]
@@ -51,9 +54,9 @@ export function TimersScreen() {
           onDurationChange={(ms) => timers.setDuration(editing.id, ms)}
           onRemove={() => {
             timers.remove(editing.id)
-            setEditingId(null)
+            closeSheet()
           }}
-          onClose={() => setEditingId(null)}
+          onClose={closeSheet}
         />
       )}
     </>

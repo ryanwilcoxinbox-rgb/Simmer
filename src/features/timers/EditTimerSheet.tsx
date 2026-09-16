@@ -26,10 +26,20 @@ export function EditTimerSheet({
   onRemove,
   onClose,
 }: Props) {
-  const closeRef = useRef<HTMLButtonElement>(null)
+  const sheetRef = useRef<HTMLDivElement>(null)
+
+  // Move focus into the sheet once, when it opens, and never again.
+  //
+  // This used to focus the Done button and list onClose as a dependency. The
+  // parent hands down a fresh onClose on every render, and typing a letter
+  // re-renders the parent, so every single keystroke in the label field pulled
+  // focus onto Done and shut the iPhone keyboard. Focusing the container
+  // rather than a button also avoids popping the keyboard open unasked.
+  useEffect(() => {
+    sheetRef.current?.focus()
+  }, [])
 
   useEffect(() => {
-    closeRef.current?.focus()
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
     }
@@ -43,7 +53,9 @@ export function EditTimerSheet({
   return (
     <div className="sheet__scrim" onClick={onClose}>
       <div
+        ref={sheetRef}
         className="sheet"
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label="Edit timer"
@@ -52,7 +64,7 @@ export function EditTimerSheet({
       >
         <div className="sheet__header">
           <h2 className="sheet__title">Edit timer</h2>
-          <button ref={closeRef} className="sheet__done" onClick={onClose}>
+          <button className="sheet__done" onClick={onClose}>
             Done
           </button>
         </div>

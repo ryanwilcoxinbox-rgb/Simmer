@@ -357,3 +357,8 @@
   border-color: var(--accent);
   color: var(--accent-ink);
 }
+
+/* Focus lands on the sheet itself when it opens, which needs no focus ring. */
+.sheet:focus {
+  outline: none;
+}
