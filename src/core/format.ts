@@ -59,3 +59,31 @@ export function formatCompact(ms: number): string {
   if (seconds === 0) return `${minutes}m`
   return `${minutes}m${String(seconds).padStart(2, '0')}`
 }
+
+/**
+ * A wall-clock time, 24 hour, for telling someone when to put the rice on.
+ *
+ * Deliberately not toLocaleTimeString: that would hand us am/pm on a phone set
+ * to US English, and "start the rice at 7:15 PM" is more reading than "19:15"
+ * when you are holding a pan.
+ */
+export function formatClock(timestamp: number): string {
+  const date = new Date(timestamp)
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${hours}:${minutes}`
+}
+
+/**
+ * A countdown to something, in words: "in 12 min", "now", "in 1 hr 5 min".
+ * Used for the next dish due in a meal plan.
+ */
+export function formatUntil(ms: number): string {
+  if (ms < 60_000) return 'now'
+  const totalMinutes = Math.floor(ms / 60_000)
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  if (hours === 0) return `in ${minutes} min`
+  if (minutes === 0) return `in ${hours} hr`
+  return `in ${hours} hr ${minutes} min`
+}
