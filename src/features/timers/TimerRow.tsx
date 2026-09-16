@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { elapsedMs, remainingMs, statusOf, type Timer } from '../../core/timers'
 import { formatDuration } from '../../core/format'
 
@@ -21,6 +22,12 @@ export function TimerRow({
   onEdit,
 }: Props) {
   const status = statusOf(timer, now)
+  // How far through the countdown we are, drawn as a fill behind the row.
+  // Stopwatches have no finish line, so they have no progress to show.
+  const progress =
+    timer.mode === 'countdown' && timer.durationMs > 0
+      ? Math.min(1, elapsedMs(timer, now) / timer.durationMs)
+      : 0
   const running = status === 'running'
   const finished = status === 'finished'
 
@@ -40,7 +47,10 @@ export function TimerRow({
       : 'Countdown'
 
   return (
-    <div className={`row${finished ? ' row--finished' : ''}`}>
+    <div
+      className={`row${finished ? ' row--finished' : running ? ' row--running' : ''}`}
+      style={{ '--progress': progress } as CSSProperties}
+    >
       <button
         className="row__info"
         onClick={onEdit}

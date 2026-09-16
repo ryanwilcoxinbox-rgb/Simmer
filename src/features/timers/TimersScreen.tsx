@@ -8,6 +8,7 @@ import { useTimersContext } from './timersStore'
 import { TimerRow } from './TimerRow'
 import { EditTimerSheet } from './EditTimerSheet'
 import { AlarmBanner } from './AlarmBanner'
+import { PotMark } from '../shell/icons'
 
 export function TimersScreen() {
   const timers = useTimersContext()
@@ -110,7 +111,10 @@ export function TimersScreen() {
 
   return (
     <>
-      <h1 className="screen__title">Simmer</h1>
+      <h1 className="screen__title">
+        <PotMark />
+        Simmer
+      </h1>
 
       <AlarmBanner
         due={due}
@@ -184,6 +188,10 @@ export function TimersScreen() {
             // time. Dropping it lets the effect above book a corrected one.
             audio.disarm(editing.id)
             timers.setDuration(editing.id, ms)
+          }}
+          onDurationAdjust={(deltaMs) => {
+            audio.disarm(editing.id)
+            timers.adjustDuration(editing.id, deltaMs)
           }}
           onRemove={() => {
             audio.disarm(editing.id)

@@ -1,20 +1,46 @@
 :root {
-  /* Warm dark palette: easy to read under kitchen lights, low glare. */
-  --bg: #16120f;
-  --surface: #241d18;
-  --surface-raised: #2f2721;
-  --border: #3a302a;
+  /*
+   * Warm dark palette. The app is looked at in a kitchen, often at arm's
+   * length and often with the lights low, so the background is a deep warm
+   * brown rather than a neutral grey: it reads as "kitchen" instead of
+   * "dashboard" and takes the clinical edge off a screen full of numbers.
+   */
+  --bg: #17110d;
+  --bg-lift: #1f1712;
+  --surface: #241b15;
+  --surface-raised: #30251d;
+  --border: #3d2f24;
+  --border-bright: #52402f;
+
   --text: #fdf6ee;
-  --text-dim: #b0a294;
-  --accent: #f97316;
-  --accent-ink: #1a0f06;
+  --text-dim: #ab9a89;
+
+  /* Amber for anything live or actionable. */
+  --accent: #ff7d21;
+  --accent-deep: #c2410c;
+  --accent-ink: #1a0d04;
+  /* A hotter red for a timer that has actually finished, so "running" and
+     "done" are never the same colour at a glance across the room. */
+  --ember: #ff4526;
 
   /* Kitchen sizing: nothing tappable is below 56px. */
   --tap: 56px;
-  --radius: 16px;
+  --radius: 18px;
+  --radius-sm: 13px;
 
   color-scheme: dark;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /*
+   * ui-rounded resolves to SF Pro Rounded on an iPhone, which is softer and
+   * friendlier than the default without costing a font download. Elsewhere it
+   * falls back through the usual system stack, so nothing is ever fetched.
+   */
+  --font-display: ui-rounded, 'SF Pro Rounded', -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    system-ui, sans-serif;
+
+  font-family: var(--font-body);
   font-synthesis: none;
   -webkit-text-size-adjust: 100%;
 }
@@ -31,8 +57,13 @@ body,
 
 body {
   margin: 0;
-  background: var(--bg);
   color: var(--text);
+  /* A faint warmth at the top, like heat coming off a hob. Deliberately
+     almost subliminal: it should add depth, not draw the eye. */
+  background:
+    radial-gradient(120% 55% at 50% 0%, #2a1c12 0%, transparent 70%),
+    var(--bg);
+  background-attachment: fixed;
   /* Stop the whole page rubber-banding when a list is dragged. */
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
@@ -45,4 +76,34 @@ button {
   background: none;
   cursor: pointer;
   touch-action: manipulation;
+}
+
+h1,
+h2,
+.row__time,
+.duration__readout,
+.temps__value,
+.ladder__temp {
+  font-family: var(--font-display);
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+.mark {
+  width: 1em;
+  height: 1em;
+}
+
+/* Anyone who has asked their phone to calm down gets a still app. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

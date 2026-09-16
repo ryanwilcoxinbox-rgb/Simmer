@@ -7,12 +7,23 @@ import { SettingsScreen } from './features/settings/SettingsScreen'
 import { SettingsProvider } from './features/settings/SettingsProvider'
 import { TimersProvider } from './features/timers/TimersProvider'
 import { NavigationContext, type TabId } from './features/shell/navigationStore'
+import {
+  GuideIcon,
+  SettingsIcon,
+  SpicesIcon,
+  TimersIcon,
+} from './features/shell/icons'
 
-const TABS: { id: TabId; label: string; screen: () => React.JSX.Element }[] = [
-  { id: 'timers', label: 'Timers', screen: TimersScreen },
-  { id: 'guide', label: 'Guide', screen: GuideScreen },
-  { id: 'spices', label: 'Spices', screen: SpicesScreen },
-  { id: 'settings', label: 'Settings', screen: SettingsScreen },
+const TABS: {
+  id: TabId
+  label: string
+  screen: () => React.JSX.Element
+  icon: () => React.JSX.Element
+}[] = [
+  { id: 'timers', label: 'Timers', screen: TimersScreen, icon: TimersIcon },
+  { id: 'guide', label: 'Guide', screen: GuideScreen, icon: GuideIcon },
+  { id: 'spices', label: 'Spices', screen: SpicesScreen, icon: SpicesIcon },
+  { id: 'settings', label: 'Settings', screen: SettingsScreen, icon: SettingsIcon },
 ]
 
 export function App() {
@@ -33,16 +44,20 @@ export function App() {
             </main>
 
             <nav className="tabbar" aria-label="Sections">
-              {TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  className="tabbar__tab"
-                  aria-current={tab.id === activeTab ? 'page' : undefined}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  {tab.label}
-                </button>
-              ))}
+              {TABS.map((tab) => {
+                const Icon = tab.icon
+                return (
+                  <button
+                    key={tab.id}
+                    className="tabbar__tab"
+                    aria-current={tab.id === activeTab ? 'page' : undefined}
+                    onClick={() => setActiveTab(tab.id)}
+                  >
+                    <Icon />
+                    {tab.label}
+                  </button>
+                )
+              })}
             </nav>
           </div>
         </NavigationContext>
