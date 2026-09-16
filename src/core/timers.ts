@@ -147,3 +147,28 @@ export function setMode(timer: Timer, mode: TimerMode): Timer {
 export function anyRunning(timers: readonly Timer[]): boolean {
   return timers.some((timer) => timer.runningSince !== null)
 }
+
+/**
+ * How far past its finish line a countdown has gone, in milliseconds. Zero
+ * for anything that has not finished.
+ */
+export function overrunMs(timer: Timer, now: number): number {
+  return Math.max(0, -remainingMs(timer, now))
+}
+
+/**
+ * Timers that have finished and whose alarm nobody has acknowledged yet.
+ *
+ * This is the whole basis of rule 3. It does not care whether the app was
+ * open when the timer ended, because the answer is recalculated from
+ * timestamps: a timer that expired while Arran was in WhatsApp looks exactly
+ * the same as one that expired in front of him, and both demand attention.
+ */
+export function unacknowledgedFinished(
+  timers: readonly Timer[],
+  now: number,
+): Timer[] {
+  return timers.filter(
+    (timer) => isFinished(timer, now) && timer.acknowledgedAt === null,
+  )
+}

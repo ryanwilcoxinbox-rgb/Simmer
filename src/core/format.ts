@@ -25,3 +25,23 @@ export function formatDuration(ms: number): string {
     ? `${hours}:${pad(minutes)}:${pad(seconds)}`
     : `${pad(minutes)}:${pad(seconds)}`
 }
+
+/**
+ * How long ago something happened, in kitchen English rather than clock
+ * digits: "just now", "3 min ago", "1 hr 5 min ago".
+ *
+ * Used for telling Arran how long a timer has been sitting finished while he
+ * was in another app, where the exact seconds matter far less than the sense
+ * of how overdue the food is.
+ */
+export function formatSince(ms: number): string {
+  const totalMinutes = Math.floor(Math.max(0, ms) / 60_000)
+  if (totalMinutes < 1) return 'just now'
+
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+
+  if (hours === 0) return `${minutes} min ago`
+  if (minutes === 0) return `${hours} hr ago`
+  return `${hours} hr ${minutes} min ago`
+}
