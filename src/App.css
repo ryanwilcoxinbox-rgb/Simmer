@@ -1,184 +1,167 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-}
-
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
-}
-
-#center {
+.app {
   display: flex;
   flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+  height: 100%;
 }
 
-#next-steps {
+.app__body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Clear the notch / Dynamic Island at the top. */
+  padding: calc(env(safe-area-inset-top) + 10px) 16px 20px;
+}
+
+/* ---- Bottom tab bar ---- */
+
+.tabbar {
   display: flex;
+  background: var(--surface);
   border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+  /* Clear the iPhone home indicator. */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+.tabbar__tab {
+  flex: 1;
+  min-height: var(--tap);
+  padding: 10px 4px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-dim);
 }
 
-#next-steps ul {
-  list-style: none;
-  padding: 0;
+.tabbar__tab[aria-current='page'] {
+  color: var(--accent);
+  box-shadow: inset 0 3px 0 var(--accent);
+}
+
+/* ---- Shared screen furniture ---- */
+
+.screen__title {
+  margin: 0 0 8px;
+  font-size: 1.625rem;
+  letter-spacing: -0.02em;
+}
+
+.screen__subtitle {
+  margin: 0 0 20px;
+  color: var(--text-dim);
+  font-size: 1rem;
+}
+
+.placeholder {
+  margin-top: 14px;
+  padding: 18px 16px;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.placeholder strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+/* ---- Timer rows (inert preview until Milestone 2) ---- */
+
+.notice {
+  margin: 0 0 14px;
+  padding: 9px 13px;
+  background: var(--surface);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 10px 10px 0;
+  color: var(--text-dim);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.rows {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/*
+ * Rows are laid out horizontally (readout left, controls right) so five of
+ * them fit on an iPhone screen at once, which the brief asks for. A stacked
+ * layout read better but only fitted three.
+ */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.row__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.row__top {
+  display: flex;
+  align-items: baseline;
   gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
 }
 
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
+.row__label {
+  overflow: hidden;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.ticks {
-  position: relative;
-  width: 100%;
+.row__mode {
+  flex: none;
+  color: var(--text-dim);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
-  }
+.row__time {
+  font-size: 2.25rem;
+  font-weight: 300;
+  line-height: 1.15;
+  /* Digits keep a fixed width so the readout does not shuffle each second. */
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
-  }
+.row__actions {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+
+.row__button {
+  min-width: 68px;
+  min-height: var(--tap);
+  padding: 0 6px;
+  border-radius: 12px;
+  background: var(--surface-raised);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.row__button--primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/*
+ * The preview stays at full contrast on purpose: the point of Milestone 1 is
+ * to judge readability at arm's length, and dimming it would defeat that.
+ */
+.rows--preview {
+  pointer-events: none;
 }
