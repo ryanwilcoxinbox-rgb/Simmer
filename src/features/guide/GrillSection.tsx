@@ -15,6 +15,7 @@ import { useSettings } from '../settings/settingsStore'
 import { useLaunchTimer } from '../shell/useLaunchTimer'
 import { matchesQuery } from '../../core/search'
 import { SearchField } from '../shell/SearchField'
+import { FilterChips } from '../shell/FilterChips'
 
 /**
  * Pick something off the grill, say how big it is, and get the temperature to
@@ -28,11 +29,14 @@ import { SearchField } from '../shell/SearchField'
 export function GrillSection() {
   const [itemId, setItemId] = useState(BBQ_ITEMS[0].id)
   const [query, setQuery] = useState('')
+  const [category, setCategory] = useState<string | null>(null)
   const item = BBQ_ITEMS.find((i) => i.id === itemId)!
 
-  const matching = BBQ_ITEMS.filter((i) =>
+  const found = BBQ_ITEMS.filter((i) =>
     matchesQuery(query, [i.name, i.alsoKnownAs, i.category, i.description]),
   )
+  const matching =
+    category === null ? found : found.filter((i) => i.category === category)
 
   return (
     <>
@@ -48,6 +52,14 @@ export function GrillSection() {
         onChange={setQuery}
         placeholder="Search cuts, for example picana"
         resultCount={matching.length}
+      />
+
+      <FilterChips
+        label="Filter by type"
+        options={BBQ_CATEGORIES}
+        value={category}
+        onChange={setCategory}
+        total={found.length}
       />
 
       {BBQ_CATEGORIES.map((category) => {
@@ -82,7 +94,7 @@ function ItemDetail({ item }: { item: BbqItem }) {
   return (
     <>
       <h2 className="guide__group">{item.name}</h2>
-      <p className="card__body" style={{ margin: '0 0 10px' }}>
+      <p className="card__body card__body--lead">
         {item.description}
       </p>
       {item.alsoKnownAs && (
@@ -260,7 +272,7 @@ function CookedThroughDetail({ item }: { item: CookedThroughItem }) {
 
       <div className="card grill__result">
         <h3 className="grill__heading">Cook it through to</h3>
-        <ul className="temps" style={{ marginTop: 0 }}>
+        <ul className="temps temps--flush">
           {item.temperatures.map((temperature) => (
             <li className="temps__row" key={temperature.label}>
               <span className="temps__value">

@@ -8,6 +8,7 @@ import { useSettings } from '../settings/settingsStore'
 import { useLaunchTimer } from '../shell/useLaunchTimer'
 import { matchesQuery } from '../../core/search'
 import { SearchField } from '../shell/SearchField'
+import { FilterChips } from '../shell/FilterChips'
 
 type Section = 'meat' | 'grill' | 'terms'
 
@@ -53,11 +54,14 @@ function MeatSection() {
   const { settings } = useSettings()
   const [openId, setOpenId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  const [group, setGroup] = useState<string | null>(null)
   const unit = settings.temperatureUnit
 
-  const matching = MEATS.filter((meat) =>
+  const found = MEATS.filter((meat) =>
     matchesQuery(query, [meat.name, meat.group, meat.summary, meat.timer?.label]),
   )
+  const matching =
+    group === null ? found : found.filter((meat) => meat.group === group)
 
   return (
     <>
@@ -71,6 +75,14 @@ function MeatSection() {
         onChange={setQuery}
         placeholder="Search meat and temperatures"
         resultCount={matching.length}
+      />
+
+      <FilterChips
+        label="Filter by type"
+        options={MEAT_GROUPS}
+        value={group}
+        onChange={setGroup}
+        total={found.length}
       />
 
       {MEAT_GROUPS.map((group) => {
@@ -92,7 +104,7 @@ function MeatSection() {
         )
       })}
 
-      {query === '' && <section>
+      {query === '' && group === null && <section>
         <h2 className="guide__group">The FSA time and temperature ladder</h2>
         <div className="card">
           <p className="card__body">
@@ -114,7 +126,7 @@ function MeatSection() {
         </div>
       </section>}
 
-      {query === '' && <div className="placeholder">
+      {query === '' && group === null && <div className="placeholder">
         <strong>Where these numbers come from</strong>
         {Object.values(SOURCES).map((source) => (
           <span key={source.short}>

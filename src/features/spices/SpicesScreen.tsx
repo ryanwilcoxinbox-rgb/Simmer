@@ -10,6 +10,7 @@ import { loadNotes, saveNotes } from '../../platform/notes'
 import type { Notes } from '../../core/notes'
 import { matchesQuery } from '../../core/search'
 import { SearchField } from '../shell/SearchField'
+import { FilterChips } from '../shell/FilterChips'
 
 type Section = 'spices' | 'blends'
 
@@ -75,8 +76,9 @@ function SpiceList({
 }) {
   const [openId, setOpenId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  const [group, setGroup] = useState<string | null>(null)
 
-  const matching = SPICES.filter((spice) =>
+  const found = SPICES.filter((spice) =>
     matchesQuery(query, [
       spice.name,
       spice.group,
@@ -87,9 +89,12 @@ function SpiceList({
       ...spice.pairsWith.map((id) => SPICE_NAMES.get(id)),
     ]),
   )
+  const matching =
+    group === null ? found : found.filter((spice) => spice.group === group)
   /** Tapping a pairing opens that spice, clearing any search in the way. */
   const jumpTo = (id: string) => {
     setQuery('')
+    setGroup(null)
     setOpenId(id)
     requestAnimationFrame(() => {
       document.getElementById('spice-' + id)?.scrollIntoView({ block: 'center' })
@@ -111,12 +116,20 @@ function SpiceList({
         resultCount={matching.length}
       />
 
-      {FLAVOUR_GROUPS.map((group) => {
-        const entries = matching.filter((spice) => spice.group === group)
+      <FilterChips
+        label="Filter by flavour"
+        options={FLAVOUR_GROUPS}
+        value={group}
+        onChange={setGroup}
+        total={found.length}
+      />
+
+      {FLAVOUR_GROUPS.map((flavour) => {
+        const entries = matching.filter((spice) => spice.group === flavour)
         if (entries.length === 0) return null
         return (
-          <section key={group}>
-            <h2 className="guide__group">{group}</h2>
+          <section key={flavour}>
+            <h2 className="guide__group">{flavour}</h2>
             {entries.map((spice) => (
               <SpiceCard
                 key={spice.id}
