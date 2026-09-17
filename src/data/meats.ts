@@ -65,7 +65,7 @@ export const FSA_TIME_TEMPERATURES = [
   { celsius: 80, hold: '6 seconds' },
 ]
 
-const POULTRY_TEMPS: Temperature[] = [
+export const POULTRY_TEMPS: Temperature[] = [
   {
     celsius: 70,
     label: 'Safe, UK',
@@ -82,7 +82,7 @@ const POULTRY_TEMPS: Temperature[] = [
   },
 ]
 
-const MINCE_TEMPS: Temperature[] = [
+export const MINCE_TEMPS: Temperature[] = [
   {
     celsius: 71.1,
     label: 'Safe, US',
@@ -140,6 +140,34 @@ export const STEAK_DONENESS: Temperature[] = [
     kind: 'preference',
     source: 'thermapen',
     note: 'Take it off the heat at 67 to 69°C.',
+  },
+]
+
+/** Whole cuts of pork. The one place UK and US guidance openly disagree. */
+export const PORK_TEMPS: Temperature[] = [
+  {
+    celsius: 62.8,
+    label: 'Safe, US',
+    kind: 'safe',
+    source: 'usda',
+    note: 'Quoted as 145°F, then rest at least 3 minutes. The rest is part of the safety step.',
+  },
+  {
+    celsius: 70,
+    label: 'Safe, UK',
+    kind: 'safe',
+    source: 'fsa',
+    note: 'Held for 2 minutes. The FSA groups pork with poultry and says cook it right through.',
+  },
+]
+
+export const FISH_TEMPS: Temperature[] = [
+  {
+    celsius: 62.8,
+    label: 'Safe, US',
+    kind: 'safe',
+    source: 'usda',
+    note: 'Quoted as 145°F for fish and shellfish. The FSA goes by the flesh turning opaque and flaking.',
   },
 ]
 

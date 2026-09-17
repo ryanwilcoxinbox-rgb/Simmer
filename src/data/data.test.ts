@@ -147,25 +147,79 @@ describe('blends', () => {
   })
 })
 
-describe('steak cuts', () => {
-  it('have unique ids and at least one thickness', async () => {
-    const { STEAK_CUTS } = await import('./cuts')
-    expect(new Set(STEAK_CUTS.map((c) => c.id)).size).toBe(STEAK_CUTS.length)
-    for (const cut of STEAK_CUTS) {
-      expect(cut.thicknessesCm.length, cut.id).toBeGreaterThan(0)
-      for (const cm of cut.thicknessesCm) {
-        expect(cm, cut.id).toBeGreaterThan(0)
-        expect(cm, cut.id).toBeLessThan(15)
+describe('bbq items', () => {
+  it('have unique ids and known categories', async () => {
+    const { BBQ_ITEMS, BBQ_CATEGORIES } = await import('./bbq')
+    expect(new Set(BBQ_ITEMS.map((i) => i.id)).size).toBe(BBQ_ITEMS.length)
+    for (const item of BBQ_ITEMS) {
+      expect(BBQ_CATEGORIES, item.id).toContain(item.category)
+    }
+  })
+
+  /*
+   * The important one. Pork, chicken, skewers, sausages and fish must never be
+   * offered as a doneness choice, and a whole cut of beef must never be dressed
+   * up as a safety figure. Getting this wrong is the difference between a
+   * cooking app and a food poisoning app.
+   */
+  it('never offers a doneness choice on anything cooked through', async () => {
+    const { BBQ_ITEMS } = await import('./bbq')
+    const mustCookThrough = ['Pork', 'Chicken', 'Fish', 'Other']
+    for (const item of BBQ_ITEMS) {
+      if (mustCookThrough.includes(item.category)) {
+        expect(item.kind, `${item.id} must be cooked through`).toBe('cooked-through')
       }
     }
   })
 
-  it('recommend a doneness that actually exists', async () => {
-    const { STEAK_CUTS } = await import('./cuts')
+  it('gives every cooked-through item safe temperatures from a safety body', async () => {
+    const { BBQ_ITEMS } = await import('./bbq')
+    for (const item of BBQ_ITEMS) {
+      if (item.kind !== 'cooked-through') continue
+      expect(item.temperatures.length, item.id).toBeGreaterThan(0)
+      for (const temperature of item.temperatures) {
+        expect(temperature.kind, item.id).toBe('safe')
+        expect(SOURCES[temperature.source].authority, item.id).toBe('safety')
+      }
+      expect(item.whyThrough.length, item.id).toBeGreaterThan(20)
+      expect(item.sizes.length, item.id).toBeGreaterThan(0)
+    }
+  })
+
+  it('only lets beef and lamb be cooked to preference', async () => {
+    const { BBQ_ITEMS } = await import('./bbq')
+    for (const item of BBQ_ITEMS) {
+      if (item.kind === 'preference') {
+        expect(['Beef', 'Lamb'], item.id).toContain(item.category)
+      }
+    }
+  })
+
+  it('gives preference cuts a doneness that exists and sensible thicknesses', async () => {
+    const { BBQ_ITEMS } = await import('./bbq')
     const { STEAK_DONENESS } = await import('./meats')
     const ids = new Set(STEAK_DONENESS.map((d) => d.id))
-    for (const cut of STEAK_CUTS) {
-      expect(ids.has(cut.suits), `${cut.id} suits unknown ${cut.suits}`).toBe(true)
+    for (const item of BBQ_ITEMS) {
+      if (item.kind !== 'preference') continue
+      expect(ids.has(item.suits), `${item.id} suits unknown ${item.suits}`).toBe(true)
+      expect(item.thicknessesCm.length, item.id).toBeGreaterThan(0)
+      for (const cm of item.thicknessesCm) {
+        expect(cm, item.id).toBeGreaterThan(0)
+        expect(cm, item.id).toBeLessThan(15)
+      }
+    }
+  })
+
+  it('gives every size a usable time and rest', async () => {
+    const { BBQ_ITEMS } = await import('./bbq')
+    for (const item of BBQ_ITEMS) {
+      if (item.kind !== 'cooked-through') continue
+      for (const size of item.sizes) {
+        const where = `${item.id}/${size.label}`
+        expect(size.minutes, where).toBeGreaterThan(0)
+        expect(size.minutes, where).toBeLessThanOrEqual(24 * 60)
+        expect(size.restMinutes, where).toBeGreaterThanOrEqual(0)
+      }
     }
   })
 

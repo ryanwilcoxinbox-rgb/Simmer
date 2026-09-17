@@ -1143,3 +1143,14 @@
   gap: 8px;
   margin: 0 16px 16px;
 }
+
+/* Why an item has no doneness choice. Stated, not implied. */
+.grill__through {
+  margin: 0 16px 14px;
+  padding: 11px 13px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface-raised));
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
