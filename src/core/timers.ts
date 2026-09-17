@@ -172,3 +172,41 @@ export function unacknowledgedFinished(
     (timer) => isFinished(timer, now) && timer.acknowledgedAt === null,
   )
 }
+
+/** Where a timer launched from the Guide should go. */
+export type Slot =
+  | { kind: 'reuse'; id: string }
+  | { kind: 'append' }
+  | { kind: 'full' }
+
+/**
+ * Choose a row for a timer launched from a reference entry.
+ *
+ * The order matters. An untouched row is taken first, so looking up three
+ * things does not leave a trail of spare timers. Failing that, a timer that has
+ * finished and been dismissed is fair game, because it is finished business and
+ * its row is doing nothing. Only when every row is genuinely in use do we admit
+ * there is no room.
+ *
+ * That last case used to be silent: the Guide would send you to the timer
+ * screen having created nothing, which looks exactly like success. Returning
+ * 'full' lets the caller say so instead.
+ */
+export function slotForLaunchedTimer(
+  timers: readonly Timer[],
+  now: number,
+  maxRows: number,
+): Slot {
+  const untouched = timers.find(
+    (timer) =>
+      timer.label === '' && timer.runningSince === null && timer.accumulatedMs === 0,
+  )
+  if (untouched) return { kind: 'reuse', id: untouched.id }
+
+  const spent = timers.find(
+    (timer) => isFinished(timer, now) && timer.acknowledgedAt !== null,
+  )
+  if (spent) return { kind: 'reuse', id: spent.id }
+
+  return timers.length < maxRows ? { kind: 'append' } : { kind: 'full' }
+}

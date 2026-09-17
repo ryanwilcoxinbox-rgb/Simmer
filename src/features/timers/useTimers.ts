@@ -86,27 +86,35 @@ export function useTimers() {
      * Reuses an untouched row if there is one, so looking up three things does
      * not leave a trail of spare timers behind.
      */
-    startLabelled: useCallback((label: string, minutes: number) => {
-      const now = Date.now()
-      const configure = (timer: Timer) =>
-        core.start(
-          core.setDuration(
-            core.setLabel(core.setMode(timer, 'countdown'), label),
-            minutes * 60_000,
-          ),
-          now,
+    /**
+     * Used by the Guide and the BBQ section. Returns false when there is no
+     * room, so the caller can say so rather than navigating to the timer screen
+     * having created nothing, which is what it used to do.
+     */
+    startLabelled: useCallback(
+      (label: string, minutes: number): boolean => {
+        const now = Date.now()
+        const slot = core.slotForLaunchedTimer(timers, now, MAX_ROWS)
+        if (slot.kind === 'full') return false
+
+        const configure = (timer: Timer) =>
+          core.start(
+            core.setDuration(
+              core.setLabel(core.setMode(core.reset(timer), 'countdown'), label),
+              minutes * 60_000,
+            ),
+            now,
+          )
+
+        setTimers((current) =>
+          slot.kind === 'reuse'
+            ? current.map((t) => (t.id === slot.id ? configure(t) : t))
+            : [...current, configure(core.createTimer())],
         )
-      setTimers((current) => {
-        const spare = current.find(
-          (t) => t.label === '' && t.runningSince === null && t.accumulatedMs === 0,
-        )
-        if (spare) {
-          return current.map((t) => (t.id === spare.id ? configure(t) : t))
-        }
-        if (current.length >= MAX_ROWS) return current
-        return [...current, configure(core.createTimer())]
-      })
-    }, []),
+        return true
+      },
+      [timers],
+    ),
     add: useCallback(() => {
       setTimers((current) =>
         current.length >= MAX_ROWS ? current : [...current, core.createTimer()],

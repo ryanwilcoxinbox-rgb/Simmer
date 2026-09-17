@@ -14,6 +14,7 @@ import {
   setDuration,
   setMode,
   start,
+  slotForLaunchedTimer,
   statusOf,
 } from './timers'
 
@@ -153,5 +154,42 @@ describe('guards', () => {
   it('knows whether anything is running', () => {
     expect(anyRunning([countdown(), stopwatch()])).toBe(false)
     expect(anyRunning([countdown(), start(stopwatch(), T0)])).toBe(true)
+  })
+})
+
+describe('finding a row for a timer launched from the Guide', () => {
+  const full = (n: number) =>
+    Array.from({ length: n }, (_, i) =>
+      start(createTimer({ id: `t${i}`, label: `Busy ${i}`, durationMs: 30 * MIN }), T0),
+    )
+
+  it('takes an untouched row before anything else', () => {
+    const timers = [...full(3), createTimer({ id: 'spare' })]
+    expect(slotForLaunchedTimer(timers, T0, 12)).toEqual({ kind: 'reuse', id: 'spare' })
+  })
+
+  it('reuses a timer that finished and was dismissed', () => {
+    const done = acknowledge(start(countdown(), T0), T0 + 6 * MIN)
+    const timers = [...full(11), { ...done, id: 'done' }]
+    expect(slotForLaunchedTimer(timers, T0 + 7 * MIN, 12)).toEqual({
+      kind: 'reuse',
+      id: 'done',
+    })
+  })
+
+  it('will not steal a finished timer that is still ringing', () => {
+    // Unacknowledged means Arran has not seen it yet. Taking that row would
+    // throw away the alarm he is about to be told about.
+    const ringing = start(countdown(), T0)
+    const timers = [...full(11), { ...ringing, id: 'ringing' }]
+    expect(slotForLaunchedTimer(timers, T0 + 7 * MIN, 12)).toEqual({ kind: 'full' })
+  })
+
+  it('adds a row while there is room', () => {
+    expect(slotForLaunchedTimer(full(5), T0, 12)).toEqual({ kind: 'append' })
+  })
+
+  it('reports being full rather than failing quietly', () => {
+    expect(slotForLaunchedTimer(full(12), T0, 12)).toEqual({ kind: 'full' })
   })
 })

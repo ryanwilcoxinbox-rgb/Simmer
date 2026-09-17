@@ -5,9 +5,7 @@ import { COOKING_TERMS, type CookingTerm } from '../../data/terms'
 import { SOURCES } from '../../data/sources'
 import { GrillSection } from './GrillSection'
 import { useSettings } from '../settings/settingsStore'
-import { useTimersContext } from '../timers/timersStore'
-import { useNavigation } from '../shell/navigationStore'
-import * as audio from '../../platform/audio'
+import { useLaunchTimer } from '../shell/useLaunchTimer'
 
 type Section = 'meat' | 'grill' | 'terms'
 
@@ -126,16 +124,7 @@ function MeatCard({
   open: boolean
   onToggle: () => void
 }) {
-  const timers = useTimersContext()
-  const { goTo } = useNavigation()
-
-  const startTimer = () => {
-    if (!meat.timer) return
-    // A real tap, so this is the moment iOS will let us open the audio system.
-    audio.unlock()
-    timers.startLabelled(meat.timer.label, meat.timer.minutes)
-    goTo('timers')
-  }
+  const { launch, problem } = useLaunchTimer()
 
   return (
     <div className="card">
@@ -199,10 +188,14 @@ function MeatCard({
           )}
 
           {meat.timer && (
-            <button className="card__timer" onClick={startTimer}>
+            <button
+              className="card__timer"
+              onClick={() => launch(meat.timer!.label, meat.timer!.minutes)}
+            >
               Start a {meat.timer.minutes} min timer for {meat.timer.label}
             </button>
           )}
+          {problem && <p className="card__caveat" role="alert">{problem}</p>}
         </>
       )}
     </div>
@@ -247,15 +240,7 @@ function TermCard({
   open: boolean
   onToggle: () => void
 }) {
-  const timers = useTimersContext()
-  const { goTo } = useNavigation()
-
-  const startTimer = () => {
-    if (!term.timer) return
-    audio.unlock()
-    timers.startLabelled(term.timer.label, term.timer.minutes)
-    goTo('timers')
-  }
+  const { launch, problem } = useLaunchTimer()
 
   return (
     <div className="card">
@@ -271,10 +256,14 @@ function TermCard({
         <>
           <p className="card__body">{term.detail}</p>
           {term.timer && (
-            <button className="card__timer" onClick={startTimer}>
+            <button
+              className="card__timer"
+              onClick={() => launch(term.timer!.label, term.timer!.minutes)}
+            >
               Start a {term.timer.minutes} min timer for {term.timer.label}
             </button>
           )}
+          {problem && <p className="card__caveat" role="alert">{problem}</p>}
         </>
       )}
     </div>

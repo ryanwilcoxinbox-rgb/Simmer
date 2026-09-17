@@ -12,9 +12,7 @@ import {
 import { STEAK_DONENESS } from '../../data/meats'
 import { SOURCES } from '../../data/sources'
 import { useSettings } from '../settings/settingsStore'
-import { useTimersContext } from '../timers/timersStore'
-import { useNavigation } from '../shell/navigationStore'
-import * as audio from '../../platform/audio'
+import { useLaunchTimer } from '../shell/useLaunchTimer'
 
 /**
  * Pick something off the grill, say how big it is, and get the temperature to
@@ -98,21 +96,13 @@ function TimerButtons({
   restMinutes: number
   turnEverySeconds?: number
 }) {
-  const timers = useTimersContext()
-  const { goTo } = useNavigation()
-
-  const startTimer = (label: string, minutes: number) => {
-    // A real tap, which is when iOS lets us open the audio system.
-    audio.unlock()
-    timers.startLabelled(label, minutes)
-    goTo('timers')
-  }
+  const { launch, problem } = useLaunchTimer()
 
   return (
     <>
       <button
         className="card__timer"
-        onClick={() => startTimer(name, totalMinutes)}
+        onClick={() => launch(name, totalMinutes)}
       >
         Start timer for {name}, {totalMinutes} min
       </button>
@@ -120,7 +110,7 @@ function TimerButtons({
         {turnEverySeconds !== undefined && (
           <button
             className="wide-button"
-            onClick={() => startTimer('Turn', turnEverySeconds / 60)}
+            onClick={() => launch('Turn', turnEverySeconds / 60)}
           >
             Turning timer,{' '}
             {turnEverySeconds >= 60
@@ -130,11 +120,12 @@ function TimerButtons({
         )}
         <button
           className="wide-button"
-          onClick={() => startTimer(`${name} rest`, restMinutes)}
+          onClick={() => launch(`${name} rest`, restMinutes)}
         >
           Rest timer, {restMinutes} min
         </button>
       </div>
+      {problem && <p className="card__caveat" role="alert">{problem}</p>}
     </>
   )
 }
