@@ -35,12 +35,30 @@ export interface Spice {
   tip?: string
 }
 
+/**
+ * One spice in a blend, and how much of it relative to the others.
+ *
+ * Parts by volume rather than grams, because that is how these are actually
+ * mixed: spoon against spoon, scaled up or down to whatever jar you have.
+ */
+export interface BlendComponent {
+  id: string
+  parts: number
+}
+
 export interface Blend {
   id: string
   name: string
   origin: string
-  /** Spice ids that typically appear. Blends vary hugely; this is a sketch. */
-  spices: string[]
+  /**
+   * What typically goes in, and in what proportion.
+   *
+   * These are a workable starting point, not the recipe. Every one of these
+   * blends varies enormously by region and by household, and several have as
+   * many versions as there are cooks. Treat the ratios as ours, adjust to
+   * taste, and write what you changed in the notes.
+   */
+  components: BlendComponent[]
   description: string
   note?: string
 }
@@ -334,60 +352,112 @@ export const BLENDS: Blend[] = [
     id: 'garam-masala',
     name: 'Garam masala',
     origin: 'North India',
-    spices: ['cinnamon', 'cardamom', 'clove', 'cumin', 'coriander-seed', 'black-pepper'],
+    components: [
+      { id: 'cumin', parts: 4 },
+      { id: 'coriander-seed', parts: 4 },
+      { id: 'cardamom', parts: 2 },
+      { id: 'black-pepper', parts: 2 },
+      { id: 'cinnamon', parts: 1 },
+      { id: 'clove', parts: 1 },
+    ],
     description:
       'A warming finishing blend rather than a base. Every family and region makes it differently, and heat is not really the point despite the name.',
-    note: 'Usually added near the end of cooking, so the aromatics are not boiled away.',
+    note: 'Toast the whole seeds before grinding, and add it near the end of cooking so the aromatics are not boiled away.',
   },
   {
     id: 'five-spice',
     name: 'Chinese five spice',
     origin: 'China',
-    spices: ['star-anise', 'fennel', 'cinnamon', 'clove', 'szechuan-pepper'],
+    components: [
+      { id: 'star-anise', parts: 2 },
+      { id: 'fennel', parts: 2 },
+      { id: 'cinnamon', parts: 1 },
+      { id: 'clove', parts: 1 },
+      { id: 'szechuan-pepper', parts: 1 },
+    ],
     description:
       'Dominated by star anise and built to cut through fat, which is why it belongs with pork and duck.',
-    note: 'Assertive. A little goes a long way in a marinade.',
+    note: 'Assertive. A teaspoon will season a whole joint, and more is not better.',
   },
   {
     id: 'ras-el-hanout',
     name: 'Ras el hanout',
     origin: 'North Africa',
-    spices: ['cumin', 'coriander-seed', 'cinnamon', 'ginger', 'turmeric', 'cardamom', 'clove'],
+    components: [
+      { id: 'cumin', parts: 3 },
+      { id: 'coriander-seed', parts: 3 },
+      { id: 'ginger', parts: 2 },
+      { id: 'cinnamon', parts: 2 },
+      { id: 'turmeric', parts: 2 },
+      { id: 'cardamom', parts: 1 },
+      { id: 'clove', parts: 1 },
+    ],
     description:
       'The name means something like "top of the shop", and traditionally it is the seller showing off. Composition varies wildly, often running to a dozen or more spices.',
+    note: 'The one most worth treating as a sketch. No two shops sell the same thing, so adjust hard and write down what you did.',
   },
   {
     id: 'baharat',
     name: 'Baharat',
     origin: 'Middle East',
-    spices: ['black-pepper', 'cumin', 'coriander-seed', 'cinnamon', 'clove', 'paprika'],
+    components: [
+      { id: 'black-pepper', parts: 3 },
+      { id: 'cumin', parts: 3 },
+      { id: 'coriander-seed', parts: 2 },
+      { id: 'paprika', parts: 2 },
+      { id: 'cinnamon', parts: 1 },
+      { id: 'clove', parts: 1 },
+    ],
     description:
       'An all-purpose warm savoury blend, peppery and slightly sweet. Good on lamb, mince and roast vegetables.',
+    note: 'Pepper-led, so it works as a rub straight onto meat without anything else.',
   },
   {
     id: 'panch-phoron',
     name: 'Panch phoron',
     origin: 'Bengal',
-    spices: ['fennel', 'mustard-seed', 'fenugreek', 'cumin', 'caraway'],
+    components: [
+      { id: 'fennel', parts: 1 },
+      { id: 'mustard-seed', parts: 1 },
+      { id: 'fenugreek', parts: 1 },
+      { id: 'cumin', parts: 1 },
+      { id: 'caraway', parts: 1 },
+    ],
     description:
-      'Five whole seeds in roughly equal measure, used whole rather than ground. Fried in hot oil at the start to flavour the fat itself.',
-    note: 'Fenugreek is the one to watch. Let it go too dark and the whole pan turns bitter.',
+      'Five whole seeds in equal measure, used whole rather than ground. Fried in hot oil at the start to flavour the fat itself.',
+    note: 'The one blend where equal parts really is the rule. Fenugreek is what to watch: let it go too dark and the whole pan turns bitter.',
   },
   {
     id: 'berbere',
     name: 'Berbere',
     origin: 'Ethiopia and Eritrea',
-    spices: ['chilli', 'fenugreek', 'coriander-seed', 'cardamom', 'allspice', 'ginger'],
+    components: [
+      { id: 'chilli', parts: 6 },
+      { id: 'coriander-seed', parts: 2 },
+      { id: 'ginger', parts: 1 },
+      { id: 'fenugreek', parts: 1 },
+      { id: 'cardamom', parts: 1 },
+      { id: 'allspice', parts: 1 },
+    ],
     description:
       'Hot and complex, with chilli leading and a distinct bitter-sweet backbone underneath from the fenugreek and warm spices.',
+    note: 'The chilli is most of it, so the heat of yours decides the heat of the blend. Start with a mild one.',
   },
   {
     id: 'jerk',
     name: 'Jerk seasoning',
     origin: 'Jamaica',
-    spices: ['allspice', 'chilli', 'black-pepper', 'cinnamon', 'nutmeg', 'garlic'],
+    components: [
+      { id: 'allspice', parts: 4 },
+      { id: 'black-pepper', parts: 2 },
+      { id: 'chilli', parts: 2 },
+      { id: 'garlic', parts: 2 },
+      { id: 'cinnamon', parts: 1 },
+      { id: 'nutmeg', parts: 1 },
+    ],
     description:
       'Built around allspice and fierce chilli heat, usually with thyme and spring onion in the wet version. Traditionally smoked as well as spiced.',
+    note: 'This is the dry rub. For the wet marinade, blend it with spring onion, thyme, soy and lime.',
   },
 ]
 

@@ -194,14 +194,24 @@ function BlendList() {
           {openId === blend.id && (
             <>
               <p className="card__body">{blend.description}</p>
-              <dl className="facts">
-                <div className="facts__item">
-                  <dt className="facts__term">Usually contains</dt>
-                  <dd className="facts__detail">
-                    {blend.spices.map((id) => SPICE_NAMES.get(id) ?? id).join(', ')}
-                  </dd>
-                </div>
-              </dl>
+
+              <ul className="recipe">
+                {blend.components.map((component) => (
+                  <li className="recipe__row" key={component.id}>
+                    <span className="recipe__parts">{component.parts}</span>
+                    <span className="recipe__spice">
+                      {SPICE_NAMES.get(component.id) ?? component.id}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <p className="card__source">
+                Parts by volume. One part as a teaspoon makes a small jar. Our
+                starting point, not the recipe: every one of these varies by
+                region and household, so adjust it and note what you changed.
+              </p>
+
               {blend.note && <p className="card__tip">{blend.note}</p>}
             </>
           )}

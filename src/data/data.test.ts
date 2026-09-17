@@ -112,10 +112,67 @@ describe('spices', () => {
 describe('blends', () => {
   it('are built from spices we hold', () => {
     for (const blend of BLENDS) {
-      expect(blend.spices.length, blend.id).toBeGreaterThan(1)
-      for (const id of blend.spices) {
-        expect(spiceIds.has(id), `${blend.id} contains unknown ${id}`).toBe(true)
+      expect(blend.components.length, blend.id).toBeGreaterThan(1)
+      for (const component of blend.components) {
+        expect(
+          spiceIds.has(component.id),
+          `${blend.id} contains unknown ${component.id}`,
+        ).toBe(true)
       }
+    }
+  })
+
+  it('never lists the same spice twice', () => {
+    for (const blend of BLENDS) {
+      const ids = blend.components.map((c) => c.id)
+      expect(new Set(ids).size, blend.id).toBe(ids.length)
+    }
+  })
+
+  it('gives every component a whole number of parts, at least one', () => {
+    // Fractions would be unusable: these are measured a spoon at a time.
+    for (const blend of BLENDS) {
+      for (const component of blend.components) {
+        expect(Number.isInteger(component.parts), `${blend.id}/${component.id}`).toBe(true)
+        expect(component.parts, `${blend.id}/${component.id}`).toBeGreaterThanOrEqual(1)
+      }
+    }
+  })
+
+  it('lists components largest first, so the blend reads as a recipe', () => {
+    for (const blend of BLENDS) {
+      const parts = blend.components.map((c) => c.parts)
+      expect(parts, blend.id).toEqual([...parts].sort((a, b) => b - a))
+    }
+  })
+})
+
+describe('steak cuts', () => {
+  it('have unique ids and at least one thickness', async () => {
+    const { STEAK_CUTS } = await import('./cuts')
+    expect(new Set(STEAK_CUTS.map((c) => c.id)).size).toBe(STEAK_CUTS.length)
+    for (const cut of STEAK_CUTS) {
+      expect(cut.thicknessesCm.length, cut.id).toBeGreaterThan(0)
+      for (const cm of cut.thicknessesCm) {
+        expect(cm, cut.id).toBeGreaterThan(0)
+        expect(cm, cut.id).toBeLessThan(15)
+      }
+    }
+  })
+
+  it('recommend a doneness that actually exists', async () => {
+    const { STEAK_CUTS } = await import('./cuts')
+    const { STEAK_DONENESS } = await import('./meats')
+    const ids = new Set(STEAK_DONENESS.map((d) => d.id))
+    for (const cut of STEAK_CUTS) {
+      expect(ids.has(cut.suits), `${cut.id} suits unknown ${cut.suits}`).toBe(true)
+    }
+  })
+
+  it('give every doneness level an id, since other data points at them', async () => {
+    const { STEAK_DONENESS } = await import('./meats')
+    for (const doneness of STEAK_DONENESS) {
+      expect(doneness.id, doneness.label).toBeTruthy()
     }
   })
 })
