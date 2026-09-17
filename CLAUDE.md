@@ -25,7 +25,7 @@ The known trade-off: a PWA on iOS can't reliably fire an alarm when the phone is
 - Vite + React + TypeScript
 - vite-plugin-pwa for the manifest and service worker (offline support, Home Screen install)
 - localStorage for saving timer state and settings
-- No backend, no accounts, no analytics
+- No backend, no accounts. Vercel Analytics is in use (added 2026-09-17) for basic, cookie-free visit counts; no personal data collection beyond that
 - Hosted on a free static host with HTTPS (Cloudflare Pages, Netlify or Vercel; recommend one and explain why). HTTPS is required for the service worker and the Wake Lock API.
 - Git from day one, with a commit after each working step
 

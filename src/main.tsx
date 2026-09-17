@@ -1,10 +1,13 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { inject } from '@vercel/analytics'
 import './index.css'
 import './theme.css'
 import { App } from './App'
 import { setupAutoUpdate } from './platform/appUpdate'
 import { loadSettings } from './platform/settings'
+
+inject()
 
 // Apply the saved palette before React paints its first screen.
 const appearance = loadSettings().appearance
