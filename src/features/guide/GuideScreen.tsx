@@ -6,6 +6,8 @@ import { SOURCES } from '../../data/sources'
 import { GrillSection } from './GrillSection'
 import { useSettings } from '../settings/settingsStore'
 import { useLaunchTimer } from '../shell/useLaunchTimer'
+import { matchesQuery } from '../../core/search'
+import { SearchField } from '../shell/SearchField'
 
 type Section = 'meat' | 'grill' | 'terms'
 
@@ -50,7 +52,12 @@ export function GuideScreen() {
 function MeatSection() {
   const { settings } = useSettings()
   const [openId, setOpenId] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
   const unit = settings.temperatureUnit
+
+  const matching = MEATS.filter((meat) =>
+    matchesQuery(query, [meat.name, meat.group, meat.summary, meat.timer?.label]),
+  )
 
   return (
     <>
@@ -59,8 +66,15 @@ function MeatSection() {
         settings and times are a rough starting point only, so use the probe.
       </p>
 
+      <SearchField
+        value={query}
+        onChange={setQuery}
+        placeholder="Search meat and temperatures"
+        resultCount={matching.length}
+      />
+
       {MEAT_GROUPS.map((group) => {
-        const entries = MEATS.filter((meat) => meat.group === group)
+        const entries = matching.filter((meat) => meat.group === group)
         if (entries.length === 0) return null
         return (
           <section key={group}>
@@ -78,7 +92,7 @@ function MeatSection() {
         )
       })}
 
-      <section>
+      {query === '' && <section>
         <h2 className="guide__group">The FSA time and temperature ladder</h2>
         <div className="card">
           <p className="card__body">
@@ -98,9 +112,9 @@ function MeatSection() {
           </ul>
           <p className="card__source">Source: {SOURCES.fsa.name}</p>
         </div>
-      </section>
+      </section>}
 
-      <div className="placeholder">
+      {query === '' && <div className="placeholder">
         <strong>Where these numbers come from</strong>
         {Object.values(SOURCES).map((source) => (
           <span key={source.short}>
@@ -108,7 +122,7 @@ function MeatSection() {
             <br />
           </span>
         ))}
-      </div>
+      </div>}
     </>
   )
 }
@@ -213,13 +227,23 @@ function Fact({ term, detail }: { term: string; detail: string }) {
 
 function TermsSection() {
   const [openId, setOpenId] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
+  const matching = COOKING_TERMS.filter((term) =>
+    matchesQuery(query, [term.term, term.short, term.detail]),
+  )
 
   return (
     <>
       <p className="guide__intro">
         Plain explanations of the words recipes use without explaining them.
       </p>
-      {COOKING_TERMS.map((term) => (
+      <SearchField
+        value={query}
+        onChange={setQuery}
+        placeholder="Search cooking terms"
+        resultCount={matching.length}
+      />
+      {matching.map((term) => (
         <TermCard
           key={term.id}
           term={term}

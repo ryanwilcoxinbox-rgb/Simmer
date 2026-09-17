@@ -13,6 +13,8 @@ import { STEAK_DONENESS } from '../../data/meats'
 import { SOURCES } from '../../data/sources'
 import { useSettings } from '../settings/settingsStore'
 import { useLaunchTimer } from '../shell/useLaunchTimer'
+import { matchesQuery } from '../../core/search'
+import { SearchField } from '../shell/SearchField'
 
 /**
  * Pick something off the grill, say how big it is, and get the temperature to
@@ -25,7 +27,12 @@ import { useLaunchTimer } from '../shell/useLaunchTimer'
  */
 export function GrillSection() {
   const [itemId, setItemId] = useState(BBQ_ITEMS[0].id)
+  const [query, setQuery] = useState('')
   const item = BBQ_ITEMS.find((i) => i.id === itemId)!
+
+  const matching = BBQ_ITEMS.filter((i) =>
+    matchesQuery(query, [i.name, i.alsoKnownAs, i.category, i.description]),
+  )
 
   return (
     <>
@@ -36,8 +43,15 @@ export function GrillSection() {
         start paying attention.
       </p>
 
+      <SearchField
+        value={query}
+        onChange={setQuery}
+        placeholder="Search cuts, for example picana"
+        resultCount={matching.length}
+      />
+
       {BBQ_CATEGORIES.map((category) => {
-        const entries = BBQ_ITEMS.filter((i) => i.category === category)
+        const entries = matching.filter((i) => i.category === category)
         if (entries.length === 0) return null
         return (
           <section key={category}>

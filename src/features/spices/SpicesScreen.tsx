@@ -8,6 +8,8 @@ import {
 } from '../../data/spices'
 import { loadNotes, saveNotes } from '../../platform/notes'
 import type { Notes } from '../../core/notes'
+import { matchesQuery } from '../../core/search'
+import { SearchField } from '../shell/SearchField'
 
 type Section = 'spices' | 'blends'
 
@@ -72,6 +74,27 @@ function SpiceList({
   onNoteChange: (id: string, note: string) => void
 }) {
   const [openId, setOpenId] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
+
+  const matching = SPICES.filter((spice) =>
+    matchesQuery(query, [
+      spice.name,
+      spice.group,
+      spice.description,
+      spice.tip,
+      ...spice.goesWith,
+      // Searching a pairing should find the spices that pair with it.
+      ...spice.pairsWith.map((id) => SPICE_NAMES.get(id)),
+    ]),
+  )
+  /** Tapping a pairing opens that spice, clearing any search in the way. */
+  const jumpTo = (id: string) => {
+    setQuery('')
+    setOpenId(id)
+    requestAnimationFrame(() => {
+      document.getElementById('spice-' + id)?.scrollIntoView({ block: 'center' })
+    })
+  }
 
   return (
     <>
@@ -81,8 +104,15 @@ function SpiceList({
         notes field for your own findings.
       </p>
 
+      <SearchField
+        value={query}
+        onChange={setQuery}
+        placeholder="Search spices"
+        resultCount={matching.length}
+      />
+
       {FLAVOUR_GROUPS.map((group) => {
-        const entries = SPICES.filter((spice) => spice.group === group)
+        const entries = matching.filter((spice) => spice.group === group)
         if (entries.length === 0) return null
         return (
           <section key={group}>
@@ -95,6 +125,7 @@ function SpiceList({
                 onNoteChange={(note) => onNoteChange(spice.id, note)}
                 open={openId === spice.id}
                 onToggle={() => setOpenId(openId === spice.id ? null : spice.id)}
+                onJumpTo={jumpTo}
               />
             ))}
           </section>
@@ -110,15 +141,20 @@ function SpiceCard({
   onNoteChange,
   open,
   onToggle,
+  onJumpTo,
 }: {
   spice: Spice
   note: string
   onNoteChange: (note: string) => void
   open: boolean
   onToggle: () => void
+  onJumpTo: (id: string) => void
 }) {
+  /** Pairings we hold as spices can be jumped to; the rest are just words. */
+  const isSpice = (id: string) => SPICES.some((s) => s.id === id)
+
   return (
-    <div className="card">
+    <div className="card" id={`spice-${spice.id}`}>
       <button className="card__head" onClick={onToggle} aria-expanded={open}>
         <span className="card__name">
           {spice.name}
@@ -135,9 +171,28 @@ function SpiceCard({
             <div className="facts__item">
               <dt className="facts__term">Pairs with</dt>
               <dd className="facts__detail">
-                {spice.pairsWith
-                  .map((id) => SPICE_NAMES.get(id) ?? id)
-                  .join(', ')}
+                {/*
+                  Tappable, because a pairing is a question: "what is coriander
+                  seed like?" Reading it as plain text meant scrolling back
+                  through the flavour groups to find out.
+                */}
+                <span className="pairings">
+                  {spice.pairsWith.map((id) =>
+                    isSpice(id) ? (
+                      <button
+                        key={id}
+                        className="pairings__link"
+                        onClick={() => onJumpTo(id)}
+                      >
+                        {SPICE_NAMES.get(id)}
+                      </button>
+                    ) : (
+                      <span className="pairings__plain" key={id}>
+                        {SPICE_NAMES.get(id) ?? id}
+                      </span>
+                    ),
+                  )}
+                </span>
               </dd>
             </div>
             <div className="facts__item">
