@@ -21,6 +21,20 @@ export function SettingsScreen() {
       <h1 className="screen__title">Settings</h1>
 
       <div className="field">
+        <span className="field__label">Appearance</span>
+        <div className="segmented" role="group" aria-label="Appearance">
+          {(['light', 'dark', 'system'] as const).map((appearance) => (
+            <button key={appearance} className="segmented__option"
+              aria-pressed={settings.appearance === appearance}
+              onClick={() => update({ appearance })}>
+              {appearance === 'light' ? 'Light' : appearance === 'dark' ? 'Dark' : 'System'}
+            </button>
+          ))}
+        </div>
+        <p className="field__hint">Linen by day, Ember by night. System follows your phone.</p>
+      </div>
+
+      <div className="field">
         <span className="field__label">Alarm</span>
         <button className="wide-button" onClick={testAlarm}>
           Test the alarm sound

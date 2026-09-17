@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import './App.css'
+import './features/timers/timers-design.css'
 import { TimersScreen } from './features/timers/TimersScreen'
 import { GuideScreen } from './features/guide/GuideScreen'
 import { SpicesScreen } from './features/spices/SpicesScreen'

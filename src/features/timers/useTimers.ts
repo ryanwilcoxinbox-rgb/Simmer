@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { loadTimers, saveTimers } from '../../platform/storage'
 import type { Timer, TimerMode } from '../../core/timers'
 import * as core from '../../core/timers'
+import { startPlannedTimer } from '../../core/planTimers'
+import type { PlanDish } from '../../core/plan'
 
 /** Five rows is the layout target from the brief, not a hard limit. */
 const DEFAULT_ROW_COUNT = 5
@@ -28,6 +30,9 @@ export function useTimers() {
 
   return {
     timers,
+    startPlanned: useCallback((dish: PlanDish, now: number) => {
+      setTimers((current) => startPlannedTimer(current, dish, now))
+    }, []),
     anyRunning: core.anyRunning(timers),
     canAdd: timers.length < MAX_ROWS,
     canRemove: timers.length > 1,

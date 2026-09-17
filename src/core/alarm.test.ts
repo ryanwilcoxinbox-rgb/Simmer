@@ -64,6 +64,7 @@ describe('unacknowledgedFinished', () => {
 describe('settings', () => {
   it('round trips', () => {
     const settings = {
+      appearance: 'dark' as const,
       temperatureUnit: 'F' as const,
       backgroundAlarm: true,
       silentReminderDismissed: true,
@@ -76,5 +77,13 @@ describe('settings', () => {
     expect(deserializeSettings('nonsense')).toEqual(DEFAULT_SETTINGS)
     expect(deserializeSettings('{"temperatureUnit":"K"}')).toEqual(DEFAULT_SETTINGS)
     expect(deserializeSettings('{"backgroundAlarm":"yes"}')).toEqual(DEFAULT_SETTINGS)
+  })
+
+  it('keeps existing preferences when upgrading settings without an appearance', () => {
+    expect(deserializeSettings('{"temperatureUnit":"F","backgroundAlarm":true,"silentReminderDismissed":true}')).toEqual({
+      appearance: 'system', temperatureUnit: 'F', backgroundAlarm: true, silentReminderDismissed: true,
+    })
+    expect(deserializeSettings('{"appearance":"sepia"}').appearance).toBe('system')
+    expect(deserializeSettings('{"appearance":"light"}').appearance).toBe('light')
   })
 })

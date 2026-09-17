@@ -8,8 +8,8 @@ interface Props {
   fallbackLabel: string
   onStart: () => void
   onPause: () => void
-  onReset: () => void
   onEdit: () => void
+  linkedToPlan?: boolean
 }
 
 export function TimerRow({
@@ -18,8 +18,8 @@ export function TimerRow({
   fallbackLabel,
   onStart,
   onPause,
-  onReset,
   onEdit,
+  linkedToPlan,
 }: Props) {
   const status = statusOf(timer, now)
   // How far through the countdown we are, drawn as a fill behind the row.
@@ -42,9 +42,9 @@ export function TimerRow({
 
   const badge = finished
     ? 'Finished'
-    : timer.mode === 'stopwatch'
-      ? 'Stopwatch'
-      : 'Countdown'
+    : status === 'paused' ? 'Paused'
+      : running ? timer.mode === 'stopwatch' ? 'Counting up' : 'Cooking'
+        : timer.mode === 'stopwatch' ? 'Stopwatch' : 'Ready'
 
   return (
     <div
@@ -60,24 +60,19 @@ export function TimerRow({
           <span className={`row__label${timer.label ? '' : ' row__label--empty'}`}>
             {timer.label || fallbackLabel}
           </span>
-          <span className="row__mode">{badge}</span>
+          <span className="row__edit" aria-hidden="true">Edit</span>
         </span>
         <span className="row__time">{readout}</span>
+        <span className="row__mode">{badge}{linkedToPlan ? ' · Meal plan' : ''}</span>
       </button>
 
       <div className="row__actions">
         <button
           className="row__button row__button--primary"
           onClick={running ? onPause : onStart}
+          aria-label={`${running ? 'Pause' : finished ? 'Restart' : status === 'paused' ? 'Resume' : 'Start'} ${timer.label || fallbackLabel}`}
         >
-          {running ? 'Pause' : status === 'paused' ? 'Resume' : 'Start'}
-        </button>
-        <button
-          className="row__button"
-          onClick={onReset}
-          disabled={status === 'idle'}
-        >
-          Reset
+          {running ? 'Pause' : finished ? 'Restart' : status === 'paused' ? 'Resume' : 'Start'}
         </button>
       </div>
     </div>

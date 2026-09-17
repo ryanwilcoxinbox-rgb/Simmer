@@ -9,8 +9,9 @@ interface Props {
   onLabelChange: (label: string) => void
   onModeChange: (mode: TimerMode) => void
   onDurationChange: (ms: number) => void
-  onDurationAdjust: (deltaMs: number) => void
+  linkedToPlan?: boolean
   onRemove: () => void
+  onReset: () => void
   onClose: () => void
 }
 
@@ -21,8 +22,9 @@ export function EditTimerSheet({
   onLabelChange,
   onModeChange,
   onDurationChange,
-  onDurationAdjust,
+  linkedToPlan,
   onRemove,
+  onReset,
   onClose,
 }: Props) {
   const sheetRef = useRef<HTMLDivElement>(null)
@@ -50,7 +52,7 @@ export function EditTimerSheet({
     <div className="sheet__scrim" onClick={onClose}>
       <div
         ref={sheetRef}
-        className="sheet"
+        className="sheet sheet--stable"
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
@@ -65,6 +67,7 @@ export function EditTimerSheet({
           </button>
         </div>
 
+        <div className="timer-name-field">
         <label className="field">
           <span className="field__label">Label</span>
           <input
@@ -79,6 +82,8 @@ export function EditTimerSheet({
             }}
           />
         </label>
+        {canRemove && <button className="timer-remove" onClick={onRemove}>Remove timer</button>}
+        </div>
 
         <div className="field">
           <span className="field__label">Mode</span>
@@ -88,30 +93,29 @@ export function EditTimerSheet({
                 key={mode}
                 className="segmented__option"
                 aria-pressed={timer.mode === mode}
+                disabled={linkedToPlan && mode === 'stopwatch'}
                 onClick={() => onModeChange(mode)}
               >
                 {mode === 'countdown' ? 'Countdown' : 'Stopwatch'}
               </button>
             ))}
           </div>
+          {linkedToPlan && <p className="field__hint">Meal-plan timer. Name and time changes also update your plan.</p>}
           {timer.mode === 'stopwatch' && (
             <p className="field__hint">Counts up from zero. No alarm.</p>
           )}
         </div>
 
-        {timer.mode === 'countdown' && (
+        <div className="timer-mode-content">
+        {timer.mode === 'countdown' ? (
           <DurationPicker
             durationMs={timer.durationMs}
             onChange={onDurationChange}
-            onAdjust={onDurationAdjust}
           />
-        )}
+        ) : <div className="stopwatch-explanation"><span className="duration__readout">00:00</span><h3>Count up at your own pace</h3><p>No duration to set. Start when you begin, pause whenever you need, and reset for your next task.</p></div>}
+        </div>
 
-        {canRemove && (
-          <button className="sheet__remove" onClick={onRemove}>
-            Remove this timer
-          </button>
-        )}
+        <button className="wide-button" onClick={onReset}>Reset timer</button>
       </div>
     </div>
   )

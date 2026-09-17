@@ -6,6 +6,7 @@
 export type TemperatureUnit = 'C' | 'F'
 
 export interface Settings {
+  appearance: 'system' | 'light' | 'dark'
   /** Used by the Guide tab from Milestone 5 onwards. */
   temperatureUnit: TemperatureUnit
   /**
@@ -25,6 +26,7 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
+  appearance: 'system',
   temperatureUnit: 'C',
   backgroundAlarm: false,
   silentReminderDismissed: false,
@@ -48,6 +50,10 @@ export function deserializeSettings(raw: string | null): Settings {
 
   const stored = parsed as Record<string, unknown>
   return {
+    appearance:
+      stored.appearance === 'light' || stored.appearance === 'dark'
+        ? stored.appearance
+        : 'system',
     temperatureUnit:
       stored.temperatureUnit === 'F' || stored.temperatureUnit === 'C'
         ? stored.temperatureUnit

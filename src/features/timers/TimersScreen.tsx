@@ -3,12 +3,14 @@ import { useNow } from '../../platform/useNow'
 import { useWakeLock } from '../../platform/useWakeLock'
 import * as audio from '../../platform/audio'
 import { remainingMs, unacknowledgedFinished, type Timer } from '../../core/timers'
-import { dueDishes, type PlanDish } from '../../core/plan'
+import { dueDishes, scheduledStart, type PlanDish } from '../../core/plan'
 import { useSettings } from '../settings/settingsStore'
 import { usePlan } from '../plan/usePlan'
 import { PlanCard } from '../plan/PlanCard'
 import { PlanPrompt } from '../plan/PlanPrompt'
 import { PlanSheet } from '../plan/PlanSheet'
+import { connectedPlan } from '../../core/planTimers'
+import { formatClock, formatCompact } from '../../core/format'
 import { useTimersContext } from './timersStore'
 import { TimerRow } from './TimerRow'
 import { EditTimerSheet } from './EditTimerSheet'
@@ -27,13 +29,15 @@ export function TimersScreen() {
    * screen up.
    */
   const now = useNow(timers.anyRunning || plan.plan !== null)
+  const livePlan = connectedPlan(plan.plan, timers.timers, now)
+  const linkedIds = new Set(livePlan?.dishes.map((dish) => dish.id))
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [planOpen, setPlanOpen] = useState(false)
   // Stable identity, so the sheet's key handler is not torn down and rebuilt
   // on every keystroke in the label field.
-  const closeSheet = useCallback(() => setEditingId(null), [])
-  const closePlan = useCallback(() => setPlanOpen(false), [])
+  const closeSheet = useCallback(() => setEditingId(null), [setEditingId])
+  const closePlan = useCallback(() => setPlanOpen(false), [setPlanOpen])
 
   // Rule 2: hold the screen awake for as long as anything is counting.
   useWakeLock(timers.anyRunning)
@@ -45,7 +49,7 @@ export function TimersScreen() {
    * dish due immediately, and being chimed at mid-sentence while typing its
    * name is no way to be greeted. The plan goes live when the sheet closes.
    */
-  const dishesDue = plan.plan && !planOpen ? dueDishes(plan.plan, now) : []
+  const dishesDue = livePlan && !planOpen ? dueDishes(livePlan, now) : []
   const prompting = dishesDue.length > 0
 
   // Rule 3 and 4: make a finished timer loud, including one that expired while
@@ -171,7 +175,8 @@ export function TimersScreen() {
     audio.unlock()
     const clock = Date.now()
     plan.startDish(dish.id, clock)
-    timers.startLabelled(dish.label || 'Dish', dish.cookMs / 60_000)
+    if (timers.timers.some((timer) => timer.id === dish.id)) timers.start(dish.id)
+    else timers.startPlanned(dish, clock)
   }
 
   const editingIndex = timers.timers.findIndex((t) => t.id === editingId)
@@ -182,10 +187,7 @@ export function TimersScreen() {
 
   return (
     <>
-      <h1 className="screen__title">
-        <PotMark />
-        Simmer
-      </h1>
+      <header className="timer-header"><h1 className="timer-brand">simmer<span>.</span></h1><PotMark /></header>
 
       <AlarmBanner
         due={finished}
@@ -198,9 +200,9 @@ export function TimersScreen() {
         }}
       />
 
-      {plan.plan && (
+      {livePlan && (
         <PlanPrompt
-          plan={plan.plan}
+          plan={livePlan}
           due={dishesDue}
           now={now}
           onStart={handleStartDish}
@@ -235,48 +237,53 @@ export function TimersScreen() {
           : 'Alarms need this app open and your ringer on.'}
       </p>
 
-      {plan.plan && (
-        <PlanCard plan={plan.plan} now={now} onEdit={() => setPlanOpen(true)} />
-      )}
-
-      <div className="rows">
-        {timers.timers.map((timer, index) => (
-          <TimerRow
-            key={timer.id}
-            timer={timer}
-            now={now}
-            fallbackLabel={nameFor(index)}
-            onStart={() => handleStart(timer)}
-            onPause={() => timers.pause(timer.id)}
-            onReset={() => timers.reset(timer.id)}
-            onEdit={() => setEditingId(timer.id)}
-          />
-        ))}
-      </div>
-
-      {timers.canAdd && (
-        <button className="add-row" onClick={timers.add}>
-          Add a timer
-        </button>
+      {livePlan && (
+        <PlanCard plan={livePlan} now={now} onEdit={() => setPlanOpen(true)} />
       )}
 
       {plan.plan === null && (
         <button
           className="add-row add-row--plan"
           onClick={() => {
-            plan.create(Date.now())
             setPlanOpen(true)
           }}
         >
-          Plan a meal that finishes together
+          <span>Finish together</span><span className="plan-entry__hint">Plan when each dish goes on <span aria-hidden="true">↗</span></span>
         </button>
       )}
+
+      {livePlan && <section className="planned-timers" aria-label="Meal plan timers">
+        <h2 className="planned-timers__heading">Your meal · connected timers</h2>
+        {livePlan.dishes.map((dish) => {
+          const timer = timers.timers.find((item) => item.id === dish.id)
+          return timer ? <TimerRow key={dish.id} timer={timer} now={now} fallbackLabel="Dish" linkedToPlan
+            onStart={() => handleStart(timer)} onPause={() => timers.pause(timer.id)} onEdit={() => setEditingId(timer.id)} />
+            : <div className="row row--scheduled" key={dish.id}><div className="row__info"><span className="row__label">{dish.label || 'Dish'}</span><span className="scheduled-time">{formatCompact(dish.cookMs)} cooking</span><span className="row__mode">{dish.startedAt === null ? 'Start at ' + formatClock(scheduledStart(dish, livePlan)) : 'Started before this update · timer not linked'}</span></div><button className="row__button" aria-label={`${dish.startedAt === null ? 'Start' : 'Restart'} ${dish.label || 'dish'}`} onClick={() => handleStartDish(dish)}>{dish.startedAt === null ? 'Start' : 'Restart'}</button></div>
+        })}
+        {livePlan.dishes.some((dish) => { const timer = timers.timers.find((item) => item.id === dish.id); return timer && timer.runningSince === null && timer.accumulatedMs > 0 }) && <p className="field__hint">A meal timer is paused. The ready time assumes you resume now.</p>}
+      </section>}
+      <div className="timers-heading"><h2>{livePlan ? 'Other timers' : 'Your timers'} <span>{timers.timers.filter((timer) => !linkedIds.has(timer.id)).length}</span></h2>{timers.canAdd && <button onClick={timers.add}>+ Add timer</button>}</div>
+      <div className="rows">
+        {timers.timers.filter((timer) => !linkedIds.has(timer.id)).map((timer) => (
+          <TimerRow
+            key={timer.id}
+            timer={timer}
+            now={now}
+            fallbackLabel={labelOf(timer)}
+            onStart={() => handleStart(timer)}
+            onPause={() => timers.pause(timer.id)}
+            onEdit={() => setEditingId(timer.id)}
+          />
+        ))}
+      </div>
+
 
       {editing && (
         <EditTimerSheet
           timer={editing}
           fallbackLabel={nameFor(editingIndex)}
-          canRemove={timers.canRemove}
+          canRemove={timers.canRemove && !linkedIds.has(editing.id)}
+          linkedToPlan={linkedIds.has(editing.id)}
           onLabelChange={(label) => timers.setLabel(editing.id, label)}
           onModeChange={(mode) => timers.setMode(editing.id, mode)}
           onDurationChange={(ms) => {
@@ -285,10 +292,7 @@ export function TimersScreen() {
             audio.disarm(editing.id)
             timers.setDuration(editing.id, ms)
           }}
-          onDurationAdjust={(deltaMs) => {
-            audio.disarm(editing.id)
-            timers.adjustDuration(editing.id, deltaMs)
-          }}
+          onReset={() => { audio.disarm(editing.id); timers.reset(editing.id) }}
           onRemove={() => {
             audio.disarm(editing.id)
             timers.remove(editing.id)
@@ -298,23 +302,22 @@ export function TimersScreen() {
         />
       )}
 
-      {planOpen && plan.plan && (
-        <PlanSheet
-          plan={plan.plan}
-          now={now}
-          canAddDish={plan.canAddDish}
-          onLabelChange={plan.setDishLabel}
-          onCookAdjust={plan.adjustDishCook}
-          onRemoveDish={plan.removeDish}
-          onAddDish={plan.addDish}
-          onReadyAdjust={plan.adjustReadyAt}
-          onReadyAsSoonAsPossible={() => plan.readyAsSoonAsPossible(Date.now())}
-          onClear={() => {
-            plan.clear()
+      {planOpen && (
+        <PlanSheet plan={livePlan} now={now}
+          onSave={(next) => {
+            for (const dish of next.dishes) {
+              if (timers.timers.some((timer) => timer.id === dish.id)) {
+                audio.disarm(dish.id)
+                timers.setLabel(dish.id, dish.label)
+                timers.setDuration(dish.id, dish.cookMs)
+              }
+            }
+            audio.unlock()
+            plan.save(next)
             closePlan()
           }}
-          onClose={closePlan}
-        />
+          onClear={() => { plan.clear(); closePlan() }}
+          onClose={closePlan} />
       )}
     </>
   )
