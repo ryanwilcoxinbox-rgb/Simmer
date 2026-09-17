@@ -7,6 +7,8 @@ import { SpicesScreen } from './features/spices/SpicesScreen'
 import { SettingsScreen } from './features/settings/SettingsScreen'
 import { SettingsProvider } from './features/settings/SettingsProvider'
 import { TimersProvider } from './features/timers/TimersProvider'
+import { PlanProvider } from './features/plan/PlanProvider'
+import { CookingSafeguards } from './features/shell/CookingSafeguards'
 import { NavigationContext, type TabId } from './features/shell/navigationStore'
 import {
   GuideIcon,
@@ -37,7 +39,10 @@ export function App() {
   return (
     <SettingsProvider>
       <TimersProvider>
+        <PlanProvider>
         <NavigationContext value={navigation}>
+          {/* Above the tab switch on purpose: these must survive changing tab. */}
+          <CookingSafeguards />
           <div className="app">
             {/* Remounting on tab change resets each screen's scroll position. */}
             <main className="app__body" key={activeTab}>
@@ -62,6 +67,7 @@ export function App() {
             </nav>
           </div>
         </NavigationContext>
+        </PlanProvider>
       </TimersProvider>
     </SettingsProvider>
   )
