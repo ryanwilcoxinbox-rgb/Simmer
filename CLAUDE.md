@@ -2,11 +2,11 @@
 
 ## Who this is for and why it exists
 
-I'm Ryan, building this for my brother Arran, who cooks a lot and uses an iPhone. I'm new to coding and relying on you to build it, so explain what you're doing as you go, in plain language. Treat me as a capable adult who doesn't know the jargon yet.
+I'm Ryan, building this with my brother Arran, who cooks a lot and uses an iPhone. I'm new to coding and relying on you to build it, so explain what you're doing as you go, in plain language. Treat me as a capable adult who doesn't know the jargon yet.
 
 Arran asked for a multi-timer he can label: rice on the hob in one row, chicken in the oven in another, and so on. He reckons five rows is enough, and each row should work as either a countdown or a stopwatch. He also wants spice pairings (which spices go together), cooking temperatures for different meats, and cooking terms and styles explained.
 
-It starts as a private app for Arran. It may go public later, so make decisions that don't block that, but don't build for strangers yet.
+It started as a private app for Arran, and I've since shared it informally with other people, who are welcome to use it if they find it helpful. It's still not built for the general public (no onboarding, no support, no polish pass for strangers), but don't make decisions that would make it harder to open up later, such as assuming there will only ever be one user or one device.
 
 ## Product vision
 
@@ -25,7 +25,7 @@ The known trade-off: a PWA on iOS can't reliably fire an alarm when the phone is
 - Vite + React + TypeScript
 - vite-plugin-pwa for the manifest and service worker (offline support, Home Screen install)
 - localStorage for saving timer state and settings
-- No backend, no accounts. Vercel Analytics is in use (added 2026-09-17) for basic, cookie-free visit counts; no personal data collection beyond that
+- No backend, no accounts for now, since everything runs client-side with localStorage. Don't rule these out for later though, a backend or accounts might come one day (e.g. syncing timers across devices), so avoid decisions that would make adding them painful. Vercel Analytics is in use (added 2026-09-17) for basic, cookie-free visit counts; no personal data collection beyond that
 - Hosted on a free static host with HTTPS (Cloudflare Pages, Netlify or Vercel; recommend one and explain why). HTTPS is required for the service worker and the Wake Lock API.
 - Git from day one, with a commit after each working step
 
@@ -84,7 +84,7 @@ Work on one milestone at a time. At the end of each, tell me how to test it on m
 5. **Guide tab.** Meat temperatures and cooking terms, the C/F toggle and "Start timer" buttons that create labelled timers.
 6. **Finish together.** Arran enters each item's cook time (chicken 40 min, rice 15, veg 8) and the app tells him when to start each one so everything is ready at the same moment, ideally starting each timer automatically or prompting him at the right time.
 7. **Spices.** Flavour groups, pairings, a handful of blends and personal notes.
-8. **Public readiness.** Only if we decide to go public: icon and branding, a food-safety disclaimer, and a review of whether the web version is enough or native (App Store, lock-screen alarms) is needed.
+8. **Public readiness.** As more people beyond Arran use it: icon and branding, a food-safety disclaimer, and a review of whether the web version is enough or native (App Store, lock-screen alarms) is needed.
 
 ## How to work with me
 
