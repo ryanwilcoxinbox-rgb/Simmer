@@ -478,9 +478,13 @@
   font-family: inherit;
 }
 
+/*
+ * Only the border changes on pointer focus. The outline is deliberately not
+ * suppressed: doing so used to beat the global focus-visible rule on
+ * specificity, leaving keyboard users with nothing but a border tint.
+ */
 .field__input:focus {
   border-color: var(--accent);
-  outline: none;
 }
 
 .field__input--area {
@@ -1198,7 +1202,12 @@
 
 .pairings__link,
 .pairings__plain {
-  padding: 5px 11px;
+  /* 44px is Apple's minimum target. These were 32px: readable, but a miss
+     with wet hands, and an audit caught them. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 13px;
   border: 1px solid var(--border);
   border-radius: 999px;
   font-size: 0.8125rem;
@@ -1212,4 +1221,34 @@
 
 .pairings__plain {
   color: var(--text-dim);
+}
+
+/* ---- Category filters ---- */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.chips__option--filter {
+  min-height: 44px;
+  padding: 0 14px;
+  font-size: 0.875rem;
+}
+
+.filters__count {
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
+/* An intro paragraph that sits outside a card, so it has no card inset. */
+.card__body--lead {
+  margin: 0 0 10px;
+}
+
+/* Temperatures directly under a heading need no top gap of their own. */
+.temps--flush {
+  margin-top: 0;
 }
