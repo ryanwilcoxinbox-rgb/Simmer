@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import './features/timers/timers-design.css'
 import { TimersScreen } from './features/timers/TimersScreen'
@@ -34,41 +34,88 @@ export function App() {
   const [activeTab, setActiveTab] = useState<TabId>('timers')
   const goTo = useCallback((tab: TabId) => setActiveTab(tab), [])
   const navigation = useMemo(() => ({ goTo }), [goTo])
-  const Screen = TABS.find((t) => t.id === activeTab)!.screen
 
   return (
     <SettingsProvider>
       <TimersProvider>
         <PlanProvider>
-        <NavigationContext value={navigation}>
-          {/* Above the tab switch on purpose: these must survive changing tab. */}
-          <CookingSafeguards />
-          <div className="app">
-            {/* Remounting on tab change resets each screen's scroll position. */}
-            <main className="app__body" key={activeTab}>
-              <Screen />
-            </main>
+          <NavigationContext value={navigation}>
+            {/* Above the tab switch on purpose: these must survive changing tab. */}
+            <CookingSafeguards />
+            <div className="app">
+              <ScreenHost activeTab={activeTab} />
 
-            <nav className="tabbar" aria-label="Sections">
-              {TABS.map((tab) => {
-                const Icon = tab.icon
-                return (
-                  <button
-                    key={tab.id}
-                    className="tabbar__tab"
-                    aria-current={tab.id === activeTab ? 'page' : undefined}
-                    onClick={() => setActiveTab(tab.id)}
-                  >
-                    <Icon />
-                    {tab.label}
-                  </button>
-                )
-              })}
-            </nav>
-          </div>
-        </NavigationContext>
+              <nav className="tabbar" aria-label="Sections">
+                {TABS.map((tab) => {
+                  const Icon = tab.icon
+                  return (
+                    <button
+                      key={tab.id}
+                      className="tabbar__tab"
+                      aria-current={tab.id === activeTab ? 'page' : undefined}
+                      onClick={() => setActiveTab(tab.id)}
+                    >
+                      <Icon />
+                      {tab.label}
+                    </button>
+                  )
+                })}
+              </nav>
+            </div>
+          </NavigationContext>
         </PlanProvider>
       </TimersProvider>
     </SettingsProvider>
+  )
+}
+
+/**
+ * Holds every screen mounted at once and shows one of them.
+ *
+ * The app used to render only the active screen, keyed by tab, which threw the
+ * others away. That meant coming back to the Guide had forgotten which cut you
+ * were reading, what you had searched for and how far down you were. Mid-cook,
+ * having to find your place again each time is exactly the wrong thing to ask
+ * of someone with their hands full.
+ *
+ * Keeping them mounted preserves all of that for free, because the components
+ * never unmount. Scroll position is the one thing it does not preserve, since
+ * a hidden element reports a scrollTop of zero, so each screen records its own
+ * position as it scrolls and gets it back on the way in.
+ */
+function ScreenHost({ activeTab }: { activeTab: TabId }) {
+  const elements = useRef(new Map<TabId, HTMLElement>())
+  const positions = useRef(new Map<TabId, number>())
+
+  useLayoutEffect(() => {
+    const element = elements.current.get(activeTab)
+    if (element) element.scrollTop = positions.current.get(activeTab) ?? 0
+  }, [activeTab])
+
+  return (
+    <>
+      {TABS.map((tab) => {
+        const Screen = tab.screen
+        return (
+          <main
+            key={tab.id}
+            className="app__body"
+            hidden={tab.id !== activeTab}
+            aria-label={tab.label}
+            ref={(element) => {
+              if (element) elements.current.set(tab.id, element)
+              else elements.current.delete(tab.id)
+            }}
+            // Recorded while scrolling, because by the time the screen is
+            // hidden its scrollTop has already been reset to zero.
+            onScroll={(event) =>
+              positions.current.set(tab.id, event.currentTarget.scrollTop)
+            }
+          >
+            <Screen />
+          </main>
+        )
+      })}
+    </>
   )
 }

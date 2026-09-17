@@ -1154,3 +1154,62 @@
   font-size: 0.875rem;
   line-height: 1.5;
 }
+
+/* Screens stay mounted and are hidden, so browsing state survives a tab change. */
+[hidden] {
+  display: none !important;
+}
+
+/* ---- Search ---- */
+
+.search {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.search__input {
+  padding-right: 72px;
+}
+
+.search__clear {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: var(--tap);
+  padding: 0 14px;
+  color: var(--accent);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.search__count {
+  margin: 8px 0 0;
+  color: var(--text-dim);
+  font-size: 0.8125rem;
+}
+
+/* ---- Tappable spice pairings ---- */
+
+.pairings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pairings__link,
+.pairings__plain {
+  padding: 5px 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+}
+
+.pairings__link {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.pairings__plain {
+  color: var(--text-dim);
+}
