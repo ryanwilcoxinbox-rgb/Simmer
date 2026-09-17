@@ -49,11 +49,25 @@ removing the line and repeating the 30 minute test.
 - It does not remove the reason to keep `src/core` portable. If Apple changes
   this, native becomes the answer again.
 
+## The silent switch: confirmed working
+
+**Arran has confirmed the alarm sounds with the silent switch on.** Tested on
+his own phone, which unlike Ryan's has a working switch.
+
+This closes the question the app was built around not being able to answer, and
+it strongly supports the hypothesis above: `navigator.audioSession.type =
+'playback'` is doing real work. Declaring Simmer a media app appears to buy us
+both the silent-switch playback and the background execution, from one line.
+
+That makes the warning comment on that line in `src/platform/audio.ts` more
+important, not less. Two separate promises now rest on it.
+
+The app still warns about the ringer, and should keep doing so. Silent mode and
+the ringer volume are not the same control, the warning costs nothing, and a
+phone at zero volume will still be silent.
+
 ## Still unknown
 
-- **The silent switch.** Untested. Ryan's silent switch is broken. Arran's
-  works, so this is a Milestone 4 question. The app warns about the ringer
-  because we cannot detect it from a web page.
 - **Whether `audioSession` is really the cause.** Settled by switching that one
   line off and repeating the 30 minute locked test.
 - **Battery cost** of holding a media session open for a long cook.
