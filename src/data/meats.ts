@@ -19,6 +19,8 @@ import type { SourceId } from './sources'
 export type TemperatureKind = 'safe' | 'preference'
 
 export interface Temperature {
+  /** Stable id, so other data can point at a doneness level. */
+  id?: string
   /** Always stored in Celsius. Converted for display. */
   celsius: number
   label: string
@@ -98,8 +100,9 @@ const MINCE_TEMPS: Temperature[] = [
 ]
 
 /** Thermapen's own chart, which is the thermometer Arran owns. */
-const STEAK_DONENESS: Temperature[] = [
+export const STEAK_DONENESS: Temperature[] = [
   {
+    id: 'rare',
     celsius: 52,
     label: 'Rare',
     kind: 'preference',
@@ -107,6 +110,7 @@ const STEAK_DONENESS: Temperature[] = [
     note: 'Take it off the heat at 48 to 50°C.',
   },
   {
+    id: 'medium-rare',
     celsius: 56,
     label: 'Medium rare',
     kind: 'preference',
@@ -114,6 +118,7 @@ const STEAK_DONENESS: Temperature[] = [
     note: 'Take it off the heat at 52 to 54°C.',
   },
   {
+    id: 'medium',
     celsius: 60,
     label: 'Medium',
     kind: 'preference',
@@ -121,6 +126,7 @@ const STEAK_DONENESS: Temperature[] = [
     note: 'Take it off the heat at 56 to 58°C.',
   },
   {
+    id: 'medium-well',
     celsius: 65,
     label: 'Medium well',
     kind: 'preference',
@@ -128,6 +134,7 @@ const STEAK_DONENESS: Temperature[] = [
     note: 'Take it off the heat at 61 to 63°C.',
   },
   {
+    id: 'well-done',
     celsius: 71,
     label: 'Well done',
     kind: 'preference',

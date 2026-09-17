@@ -3,12 +3,13 @@ import { formatTemperature } from '../../core/temperature'
 import { FSA_TIME_TEMPERATURES, MEATS, MEAT_GROUPS, type MeatEntry } from '../../data/meats'
 import { COOKING_TERMS, type CookingTerm } from '../../data/terms'
 import { SOURCES } from '../../data/sources'
+import { GrillSection } from './GrillSection'
 import { useSettings } from '../settings/settingsStore'
 import { useTimersContext } from '../timers/timersStore'
 import { useNavigation } from '../shell/navigationStore'
 import * as audio from '../../platform/audio'
 
-type Section = 'meat' | 'terms'
+type Section = 'meat' | 'grill' | 'terms'
 
 export function GuideScreen() {
   const [section, setSection] = useState<Section>('meat')
@@ -23,18 +24,27 @@ export function GuideScreen() {
           aria-pressed={section === 'meat'}
           onClick={() => setSection('meat')}
         >
-          Meat temperatures
+          Meat
+        </button>
+        <button
+          className="segmented__option"
+          aria-pressed={section === 'grill'}
+          onClick={() => setSection('grill')}
+        >
+          Steak and BBQ
         </button>
         <button
           className="segmented__option"
           aria-pressed={section === 'terms'}
           onClick={() => setSection('terms')}
         >
-          Cooking terms
+          Terms
         </button>
       </div>
 
-      {section === 'meat' ? <MeatSection /> : <TermsSection />}
+      {section === 'meat' && <MeatSection />}
+      {section === 'grill' && <GrillSection />}
+      {section === 'terms' && <TermsSection />}
     </>
   )
 }
