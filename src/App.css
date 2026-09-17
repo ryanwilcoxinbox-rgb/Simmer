@@ -1252,3 +1252,71 @@
 .temps--flush {
   margin-top: 0;
 }
+
+/* ---- Add to Home Screen prompt ---- */
+
+.install {
+  margin-bottom: 14px;
+  padding: 16px;
+  background: var(--surface-raised);
+  border: 1px solid var(--accent-deep);
+  border-radius: var(--radius);
+}
+
+.install__lead {
+  margin: 0 0 12px;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.install__lead strong {
+  color: var(--accent);
+}
+
+.install__steps {
+  margin: 0 0 14px;
+  padding-left: 1.3em;
+  color: var(--text-dim);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.install__steps li {
+  margin-bottom: 5px;
+}
+
+.install__note {
+  margin: 0 0 14px;
+  color: var(--text-dim);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.install__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.install__add {
+  flex: 1;
+  min-width: 160px;
+  min-height: var(--tap);
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+  color: var(--accent-ink);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.install__dismiss {
+  flex: 1;
+  min-width: 160px;
+  min-height: var(--tap);
+  background: transparent;
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}

@@ -23,6 +23,12 @@ export interface Settings {
    * telling the user plainly.
    */
   silentReminderDismissed: boolean
+  /**
+   * Whether the Home Screen prompt has been dismissed. Once dismissed it never
+   * returns: it has nothing new to say the second time, and a prompt that
+   * comes back is nagging.
+   */
+  installPromptDismissed: boolean
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -30,6 +36,7 @@ export const DEFAULT_SETTINGS: Settings = {
   temperatureUnit: 'C',
   backgroundAlarm: false,
   silentReminderDismissed: false,
+  installPromptDismissed: false,
 }
 
 export function serializeSettings(settings: Settings): string {
@@ -66,5 +73,9 @@ export function deserializeSettings(raw: string | null): Settings {
       typeof stored.silentReminderDismissed === 'boolean'
         ? stored.silentReminderDismissed
         : DEFAULT_SETTINGS.silentReminderDismissed,
+    installPromptDismissed:
+      typeof stored.installPromptDismissed === 'boolean'
+        ? stored.installPromptDismissed
+        : DEFAULT_SETTINGS.installPromptDismissed,
   }
 }

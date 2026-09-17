@@ -15,11 +15,24 @@ import { TimerRow } from './TimerRow'
 import { EditTimerSheet } from './EditTimerSheet'
 import { AlarmBanner } from './AlarmBanner'
 import { PotMark } from '../shell/icons'
+import { InstallPrompt } from '../shell/InstallPrompt'
+import { useInstallAdvice } from '../shell/useInstallAdvice'
+import { shouldOfferInstall } from '../../core/install'
 
 export function TimersScreen() {
   const timers = useTimersContext()
   const plan = usePlanContext()
   const { settings, update } = useSettings()
+
+  /*
+   * Only one banner gets the first visit. Someone still in a browser tab has
+   * not set the app up yet, so the Home Screen prompt goes first; the ringer
+   * reminder waits its turn. Once installed there is nothing to prompt, so the
+   * reminder takes the slot straight away.
+   */
+  const installAdvice = useInstallAdvice()
+  const offerInstall =
+    !settings.installPromptDismissed && shouldOfferInstall(installAdvice)
 
   /*
    * The clock has to tick while a plan is live even with nothing counting,
@@ -99,11 +112,23 @@ export function TimersScreen() {
       )}
 
       {/*
+        Shown before the ringer reminder, and instead of it. Someone still in a
+        browser tab has not set the app up yet, and stacking two banners on a
+        first visit buries both.
+      */}
+      {offerInstall && (
+        <InstallPrompt
+          advice={installAdvice}
+          onDismiss={() => update({ installPromptDismissed: true })}
+        />
+      )}
+
+      {/*
         A one-off nudge, because a web page cannot read the silent switch and
         so cannot warn you at the moment it actually matters. It is a nudge
         only. The standing line below is the real safeguard, per rule 5.
       */}
-      {!settings.silentReminderDismissed && (
+      {!offerInstall && !settings.silentReminderDismissed && (
         <div className="reminder">
           <p className="reminder__text">
             <strong>Check your ringer is on.</strong> Simmer cannot tell whether

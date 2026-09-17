@@ -68,6 +68,7 @@ describe('settings', () => {
       temperatureUnit: 'F' as const,
       backgroundAlarm: true,
       silentReminderDismissed: true,
+      installPromptDismissed: true,
     }
     expect(deserializeSettings(serializeSettings(settings))).toEqual(settings)
   })
@@ -81,7 +82,13 @@ describe('settings', () => {
 
   it('keeps existing preferences when upgrading settings without an appearance', () => {
     expect(deserializeSettings('{"temperatureUnit":"F","backgroundAlarm":true,"silentReminderDismissed":true}')).toEqual({
-      appearance: 'system', temperatureUnit: 'F', backgroundAlarm: true, silentReminderDismissed: true,
+      appearance: 'system',
+      temperatureUnit: 'F',
+      backgroundAlarm: true,
+      silentReminderDismissed: true,
+      // Settings saved before the Home Screen prompt existed default to not
+      // yet dismissed, so anyone still in a browser gets asked once.
+      installPromptDismissed: false,
     })
     expect(deserializeSettings('{"appearance":"sepia"}').appearance).toBe('system')
     expect(deserializeSettings('{"appearance":"light"}').appearance).toBe('light')
