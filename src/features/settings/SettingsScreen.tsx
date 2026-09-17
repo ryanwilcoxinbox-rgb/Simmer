@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import * as audio from '../../platform/audio'
+import { buildStamp, checkForUpdate } from '../../platform/appUpdate'
 import { isWakeLockSupported } from '../../platform/useWakeLock'
 import { useSettings } from './settingsStore'
 
 export function SettingsScreen() {
   const { settings, update } = useSettings()
+  const [updateNote, setUpdateNote] = useState<string | null>(null)
 
   const testAlarm = () => {
     // Opened inside the tap, exactly as the real alarm is.
@@ -67,6 +70,28 @@ export function SettingsScreen() {
         <p className="field__hint">
           Changes every temperature shown in the Guide.
         </p>
+      </div>
+
+      <div className="field">
+        <span className="field__label">Version</span>
+        <button
+          className="wide-button"
+          onClick={() => {
+            setUpdateNote(
+              checkForUpdate()
+                ? 'Checking. If there is a new version it will load shortly.'
+                : 'Cannot check right now. Close the app fully and reopen it.',
+            )
+          }}
+        >
+          Check for updates
+        </button>
+        <p className="field__hint">
+          This copy was built {buildStamp()}. Simmer checks for a new version
+          every minute and whenever you come back to it, so you should not
+          normally need this button.
+        </p>
+        {updateNote && <p className="field__hint">{updateNote}</p>}
       </div>
 
       <div className="placeholder">

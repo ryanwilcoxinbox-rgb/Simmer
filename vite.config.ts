@@ -3,12 +3,22 @@ import { defineConfig } from 'vitest/config'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  define: {
+    // Stamped in at build time so Settings can show which version is running.
+    // Without it there is no way to answer "did the update actually arrive".
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
   plugins: [
     react(),
     VitePWA({
       // Ship updates without Arran having to do anything: the new service
       // worker takes over as soon as it has downloaded.
       registerType: 'autoUpdate',
+      // We register the worker ourselves in src/platform/appUpdate.ts so that
+      // it can be told to go and check for a new version. Left to itself it
+      // only ever checks on a page navigation, which an installed app sitting
+      // in the app switcher may not do for days.
+      injectRegister: null,
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Simmer',
