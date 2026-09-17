@@ -39,6 +39,16 @@ const BEEP_LENGTH = 0.14
 const BEEP_GAP = 0.1
 const BEEPS_PER_BURST = 4
 const BURST_PERIOD_MS = 2200
+/*
+ * How long the alarm will sound before giving up, in milliseconds.
+ *
+ * It used to repeat forever until dismissed, which sounds right for a kitchen
+ * and is wrong everywhere else. An undismissed timer meant the app beeped
+ * indefinitely, drowning out anything started afterwards. Nothing is lost by
+ * stopping: the banner and the highlighted row stay put, and coming back to
+ * the app sets it off again.
+ */
+const ALARM_MAX_MS = 120_000
 
 export function isSupported(): boolean {
   return typeof window !== 'undefined' && Boolean(window.AudioContext ?? window.webkitAudioContext)
@@ -115,7 +125,12 @@ export function startAlarm(): void {
   if (!context || burstTimer !== null) return
   resume()
   scheduleBurst(context.currentTime + 0.05)
+  const startedAt = Date.now()
   burstTimer = window.setInterval(() => {
+    if (Date.now() - startedAt >= ALARM_MAX_MS) {
+      stopAlarm()
+      return
+    }
     if (context) scheduleBurst(context.currentTime + 0.05)
   }, BURST_PERIOD_MS)
 }
@@ -228,6 +243,8 @@ let promptTimer: number | null = null
  */
 const PROMPT_TONES = [587.3, 880] // D5 up to A5, an open interval rather than urgent
 const PROMPT_PERIOD_MS = 5000
+/** Same reasoning as the alarm: nag, but do not nag forever. */
+const PROMPT_MAX_MS = 120_000
 
 function schedulePromptChime(startAt: number): void {
   if (!context) return
@@ -252,7 +269,12 @@ export function startPrompting(): void {
   if (!context || promptTimer !== null) return
   resume()
   schedulePromptChime(context.currentTime + 0.05)
+  const startedAt = Date.now()
   promptTimer = window.setInterval(() => {
+    if (Date.now() - startedAt >= PROMPT_MAX_MS) {
+      stopPrompting()
+      return
+    }
     if (context) schedulePromptChime(context.currentTime + 0.05)
   }, PROMPT_PERIOD_MS)
 }
