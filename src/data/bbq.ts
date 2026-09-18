@@ -83,8 +83,8 @@ export const BBQ_ITEMS: BbqItem[] = [
   {
     kind: 'preference',
     id: 'picana',
-    name: 'Picaña',
-    alsoKnownAs: 'Picanha, rump cap, culotte',
+    name: 'Rump cap',
+    alsoKnownAs: 'Picaña, picanha, culotte',
     category: 'Beef',
     description:
       'Rump cap with the fat still on top. The fat is the whole point: it bastes the meat as it renders, so it is never trimmed off.',
@@ -97,8 +97,8 @@ export const BBQ_ITEMS: BbqItem[] = [
   {
     kind: 'preference',
     id: 'entrecote',
-    name: 'Entrecot',
-    alsoKnownAs: 'Ribeye, entrecôte',
+    name: 'Ribeye',
+    alsoKnownAs: 'Entrecot, entrecôte',
     category: 'Beef',
     description:
       'Well marbled with fat running through the muscle rather than sitting on top. That fat needs heat to render, which is why a rare ribeye can feel greasy.',
@@ -111,8 +111,8 @@ export const BBQ_ITEMS: BbqItem[] = [
   {
     kind: 'preference',
     id: 'chuleton',
-    name: 'Chuletón',
-    alsoKnownAs: 'Large bone-in ribeye, cote de boeuf',
+    name: 'Bone-in ribeye',
+    alsoKnownAs: 'Chuletón, tomahawk, cote de boeuf',
     category: 'Beef',
     description:
       'A very thick bone-in ribeye, usually shared between two or more. Thick enough that it is a different job from a normal steak.',
@@ -125,8 +125,8 @@ export const BBQ_ITEMS: BbqItem[] = [
   {
     kind: 'preference',
     id: 'solomillo',
-    name: 'Solomillo de ternera',
-    alsoKnownAs: 'Beef fillet, tenderloin',
+    name: 'Beef fillet',
+    alsoKnownAs: 'Solomillo de ternera, tenderloin',
     category: 'Beef',
     description:
       'The leanest and most tender cut, and the least forgiving. Almost no fat, so there is nothing to protect it once it goes past your target.',
@@ -139,8 +139,8 @@ export const BBQ_ITEMS: BbqItem[] = [
   {
     kind: 'preference',
     id: 'lomo-alto',
-    name: 'Lomo alto',
-    alsoKnownAs: 'Sirloin, striploin',
+    name: 'Sirloin',
+    alsoKnownAs: 'Lomo alto, striploin',
     category: 'Beef',
     description:
       'Leaner than ribeye but with a fat cap along one edge. A good middle ground: enough fat for flavour, enough structure to hold a crust.',
@@ -153,8 +153,8 @@ export const BBQ_ITEMS: BbqItem[] = [
   {
     kind: 'preference',
     id: 'falda',
-    name: 'Falda',
-    alsoKnownAs: 'Flank, skirt, bavette',
+    name: 'Flank steak',
+    alsoKnownAs: 'Falda, skirt, bavette',
     category: 'Beef',
     description:
       'Thin, coarse grained and full of flavour. A different animal from the thick cuts: it is over in minutes.',
@@ -169,8 +169,8 @@ export const BBQ_ITEMS: BbqItem[] = [
   {
     kind: 'preference',
     id: 'chuletas-cordero',
-    name: 'Chuletas de cordero',
-    alsoKnownAs: 'Lamb chops, cutlets',
+    name: 'Lamb chops',
+    alsoKnownAs: 'Chuletas de cordero, cutlets',
     category: 'Lamb',
     description:
       'A whole cut like beef, so pink in the middle is fine once the outside is seared. Small, fatty and quick.',
@@ -185,8 +185,8 @@ export const BBQ_ITEMS: BbqItem[] = [
   {
     kind: 'cooked-through',
     id: 'solomillo-cerdo',
-    name: 'Solomillo de cerdo',
-    alsoKnownAs: 'Pork tenderloin, fillet',
+    name: 'Pork tenderloin',
+    alsoKnownAs: 'Solomillo de cerdo, pork fillet',
     category: 'Pork',
     description:
       'Lean, quick and very easy to overcook. It has almost no fat, so a couple of minutes too long is the difference between juicy and dry.',
@@ -206,8 +206,8 @@ export const BBQ_ITEMS: BbqItem[] = [
   {
     kind: 'cooked-through',
     id: 'secreto',
-    name: 'Secreto',
-    alsoKnownAs: 'Pork skirt, secreto ibérico',
+    name: 'Pork skirt',
+    alsoKnownAs: 'Secreto, secreto ibérico',
     category: 'Pork',
     description:
       'A thin, heavily marbled cut from behind the shoulder. The fat is laced right through it, which makes it far more forgiving than most pork.',
@@ -226,8 +226,8 @@ export const BBQ_ITEMS: BbqItem[] = [
   {
     kind: 'cooked-through',
     id: 'chuletas-cerdo',
-    name: 'Chuletas de cerdo',
-    alsoKnownAs: 'Pork chops',
+    name: 'Pork chops',
+    alsoKnownAs: 'Chuletas de cerdo',
     category: 'Pork',
     description:
       'Bone-in pork chops. The bone slows the heat down on one side, so the meat next to it finishes last.',
@@ -310,8 +310,8 @@ export const BBQ_ITEMS: BbqItem[] = [
   {
     kind: 'cooked-through',
     id: 'pinchos',
-    name: 'Pinchos',
-    alsoKnownAs: 'Skewers, brochetas, pinchos morunos',
+    name: 'Skewers',
+    alsoKnownAs: 'Pinchos, brochetas, pinchos morunos',
     category: 'Other',
     description:
       'Cubes of meat on a skewer, usually marinated. Quick, and easy to dry out because the pieces are small.',
